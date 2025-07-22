@@ -1,0 +1,4 @@
+.env
+/vendor/
+/public/css/*.map # If Tailwind generates sourcemaps
+/node_modules/ # If you decide to use npm/yarn for Tailwind in the future
