@@ -1,0 +1,54 @@
+2025-07-22 20:55:15 - Processing notification. Raw Input:
+{"va_numbers":[{"va_number":"21752875333555755742610","bank":"bca"}],"transaction_time":"2025-07-22 20:55:15","transaction_status":"pending","transaction_id":"944c033a-b8cc-490b-b172-61a643674b55","status_message":"midtrans payment notification","status_code":"201","signature_key":"19f7b99d1bbbdb0d662e8f7d06328bc2378574e93c8875011c9ace6b81f898a8ed6bfba4b1f5cf3f7e31b72be1a75233efb8af699b7d6fa0547ee03a1ba9e414","payment_type":"bank_transfer","payment_amounts":[],"order_id":"ZP-1753192509-8","merchant_id":"G178521752","gross_amount":"790000.00","fraud_status":"accept","expiry_time":"2025-07-23 20:55:15","currency":"IDR"}
+----
+2025-07-22 20:55:16 - Notification object created. Order ID: ZP-1753192509-8, Status: pending
+2025-07-22 20:55:23 - Processing notification. Raw Input:
+{"va_numbers":[{"va_number":"21752875333555755742610","bank":"bca"}],"transaction_time":"2025-07-22 20:55:15","transaction_status":"settlement","transaction_id":"944c033a-b8cc-490b-b172-61a643674b55","status_message":"midtrans payment notification","status_code":"200","signature_key":"a6ee1d279b34e07872137ff21d6af1f1be6a0281987660e102099efd3a02225798d0a29c2abd8fc1ca8e3f579e6ec6ce729350989042114ff4e131a01b4789fd","settlement_time":"2025-07-22 20:55:22","payment_type":"bank_transfer","payment_amounts":[],"order_id":"ZP-1753192509-8","merchant_id":"G178521752","gross_amount":"790000.00","fraud_status":"accept","expiry_time":"2025-07-23 20:55:15","currency":"IDR"}
+----
+2025-07-22 20:55:24 - Notification object created. Order ID: ZP-1753192509-8, Status: settlement
+2025-07-22 20:58:25 - Processing notification. Raw Input:
+{"va_numbers":[{"va_number":"21752710670860294306488","bank":"bca"}],"transaction_time":"2025-07-22 20:58:25","transaction_status":"pending","transaction_id":"e9aa1edf-ef0b-49c8-9e07-fae13e5bf296","status_message":"midtrans payment notification","status_code":"201","signature_key":"b9e94be6aadadb614ee78eb221b387e927551564a1d1c592fcaede76df0b876bb677135b492cd27fa35c611f26a749db417479fa69c2ce0745f94e48c4dcae06","payment_type":"bank_transfer","payment_amounts":[],"order_id":"ZP-1753192351-8","merchant_id":"G178521752","gross_amount":"3965000.00","fraud_status":"accept","expiry_time":"2025-07-23 20:58:25","currency":"IDR"}
+----
+2025-07-22 20:58:26 - Notification object created. Order ID: ZP-1753192351-8, Status: pending
+2025-07-22 20:58:26 - Status for Order ID: ZP-1753192351-8 already pending. No update needed.
+2025-07-22 20:58:37 - Processing notification. Raw Input:
+{"va_numbers":[{"va_number":"21752710670860294306488","bank":"bca"}],"transaction_time":"2025-07-22 20:58:25","transaction_status":"settlement","transaction_id":"e9aa1edf-ef0b-49c8-9e07-fae13e5bf296","status_message":"midtrans payment notification","status_code":"200","signature_key":"2297c0c18328926988be1447e25bb24ef0476c1d8bccc9fafe21c26276b734d394cc219d3371eb875a785d0075294c0c590daf79a68129692fcdf3f0c66eda74","settlement_time":"2025-07-22 20:58:37","payment_type":"bank_transfer","payment_amounts":[],"order_id":"ZP-1753192351-8","merchant_id":"G178521752","gross_amount":"3965000.00","fraud_status":"accept","expiry_time":"2025-07-23 20:58:25","currency":"IDR"}
+----
+2025-07-22 20:58:37 - Notification object created. Order ID: ZP-1753192351-8, Status: settlement
+2025-07-22 20:58:37 - Status updated to success for Order ID: ZP-1753192351-8
+2025-07-23 00:53:04 - Processing notification. Raw Input:
+{"va_numbers":[{"va_number":"21752684725138921289119","bank":"bca"}],"transaction_time":"2025-07-23 00:53:05","transaction_status":"pending","transaction_id":"7f295c48-9d1d-4f0a-a0ec-d44a1e79f7c9","status_message":"midtrans payment notification","status_code":"201","signature_key":"75e31440eaaa13cd93a1356b581faeb5d73669b45f1ff3f7e3c1916b620642c9ab4b8a03fdf84cd158e60ab1aaa15f2072b755a77192b53e2ec2b03d51fb55c6","payment_type":"bank_transfer","payment_amounts":[],"order_id":"ZP-1753206766-7","merchant_id":"G178521752","gross_amount":"1600000.00","fraud_status":"accept","expiry_time":"2025-07-24 00:53:05","currency":"IDR"}
+----
+2025-07-23 00:53:05 - Notification object created. Order ID: ZP-1753206766-7, Status: pending, Fraud: accept, Payment Type: bank_transfer
+2025-07-23 00:53:05 - Calculated newStatus: pending for Order ID: ZP-1753206766-7
+2025-07-23 00:53:05 - Status for Order ID: ZP-1753206766-7 already pending. No update needed.
+2025-07-23 00:53:10 - Processing notification. Raw Input:
+{"va_numbers":[{"va_number":"21752684725138921289119","bank":"bca"}],"transaction_time":"2025-07-23 00:53:05","transaction_status":"settlement","transaction_id":"7f295c48-9d1d-4f0a-a0ec-d44a1e79f7c9","status_message":"midtrans payment notification","status_code":"200","signature_key":"994bb87f569f1606fb31d6a0a1c0157ea0101ceb05f0565bc411318601fa5a02b73bc6ec115c9c675840dcd3bebc4ba503ddfc23dfbd747f6c39d6b9821da12d","settlement_time":"2025-07-23 00:53:11","payment_type":"bank_transfer","payment_amounts":[],"order_id":"ZP-1753206766-7","merchant_id":"G178521752","gross_amount":"1600000.00","fraud_status":"accept","expiry_time":"2025-07-24 00:53:05","currency":"IDR"}
+----
+2025-07-23 00:53:10 - Notification object created. Order ID: ZP-1753206766-7, Status: settlement, Fraud: accept, Payment Type: bank_transfer
+2025-07-23 00:53:10 - Calculated newStatus: success for Order ID: ZP-1753206766-7
+2025-07-23 00:53:10 - Status updated to success for Order ID: ZP-1753206766-7
+2025-07-23 00:55:35 - Processing notification. Raw Input:
+{"va_numbers":[{"va_number":"21752199970024608410227","bank":"bca"}],"transaction_time":"2025-07-23 00:55:35","transaction_status":"pending","transaction_id":"45f6daab-feb2-4e49-8bd4-bc73253929f1","status_message":"midtrans payment notification","status_code":"201","signature_key":"852cc888ed3e4b981f55c5aab606ceb78ecd323a0cc58c3c90de94318584ec6d0de3221aba48e8a7e4f47b98dd244b1a0a75f7da975f9a7724cde3f78bc7ad02","payment_type":"bank_transfer","payment_amounts":[],"order_id":"ZP-1753206925-7","merchant_id":"G178521752","gross_amount":"19500.00","fraud_status":"accept","expiry_time":"2025-07-24 00:55:35","currency":"IDR"}
+----
+2025-07-23 00:55:35 - Notification object created. Order ID: ZP-1753206925-7, Status: pending, Fraud: accept, Payment Type: bank_transfer
+2025-07-23 00:55:35 - Calculated newStatus: pending for Order ID: ZP-1753206925-7
+2025-07-23 00:55:35 - Status for Order ID: ZP-1753206925-7 already pending. No update needed.
+2025-07-23 00:55:51 - Processing notification. Raw Input:
+{"va_numbers":[{"va_number":"21752199970024608410227","bank":"bca"}],"transaction_time":"2025-07-23 00:55:35","transaction_status":"settlement","transaction_id":"45f6daab-feb2-4e49-8bd4-bc73253929f1","status_message":"midtrans payment notification","status_code":"200","signature_key":"b303a00125accbc731c96fc46aabe34fee78688e85e9da7385f35218996c909625ee6f00b4d06f6ea61498b7d60c15c81516b0160ce13934c84b16a5eb7cbf73","settlement_time":"2025-07-23 00:55:52","payment_type":"bank_transfer","payment_amounts":[],"order_id":"ZP-1753206925-7","merchant_id":"G178521752","gross_amount":"19500.00","fraud_status":"accept","expiry_time":"2025-07-24 00:55:35","currency":"IDR"}
+----
+2025-07-23 00:55:52 - Notification object created. Order ID: ZP-1753206925-7, Status: settlement, Fraud: accept, Payment Type: bank_transfer
+2025-07-23 00:55:52 - Calculated newStatus: success for Order ID: ZP-1753206925-7
+2025-07-23 00:55:52 - Status updated to success for Order ID: ZP-1753206925-7
+2025-07-23 01:20:09 - Processing notification. Raw Input:
+{"va_numbers":[{"va_number":"21752120910565385959953","bank":"bca"}],"transaction_time":"2025-07-23 01:20:10","transaction_status":"pending","transaction_id":"f0493859-d9ee-4b22-abb8-eee54e099a7b","status_message":"midtrans payment notification","status_code":"201","signature_key":"c2712234b998437999ba460d3dc511753902dc1dfb1eabcb61687a4182138d1a6e7ce3f82d727652d21759c5a30d0a1cc8a9c70039a7dd0b6f9885a116161375","payment_type":"bank_transfer","payment_amounts":[],"order_id":"ZP-1753207007-7","merchant_id":"G178521752","gross_amount":"1976000.00","fraud_status":"accept","expiry_time":"2025-07-24 01:20:10","currency":"IDR"}
+----
+2025-07-23 01:20:10 - Notification object created. Order ID: ZP-1753207007-7, Status: pending, Fraud: accept, Payment Type: bank_transfer
+2025-07-23 01:20:10 - Calculated newStatus: pending for Order ID: ZP-1753207007-7
+2025-07-23 01:20:10 - Status for Order ID: ZP-1753207007-7 already pending. No update needed.
+2025-07-23 01:20:15 - Processing notification. Raw Input:
+{"va_numbers":[{"va_number":"21752120910565385959953","bank":"bca"}],"transaction_time":"2025-07-23 01:20:10","transaction_status":"settlement","transaction_id":"f0493859-d9ee-4b22-abb8-eee54e099a7b","status_message":"midtrans payment notification","status_code":"200","signature_key":"234d22ed4e1770bb37594676849bb2d742ad27990703163af1a7ec288aba0459a7f218a0cea952627340bc0fc4f70cabb3eb6660730c5c67991d6331503469c1","settlement_time":"2025-07-23 01:20:16","payment_type":"bank_transfer","payment_amounts":[],"order_id":"ZP-1753207007-7","merchant_id":"G178521752","gross_amount":"1976000.00","fraud_status":"accept","expiry_time":"2025-07-24 01:20:10","currency":"IDR"}
+----
+2025-07-23 01:20:15 - Notification object created. Order ID: ZP-1753207007-7, Status: settlement, Fraud: accept, Payment Type: bank_transfer
+2025-07-23 01:20:15 - Calculated newStatus: success for Order ID: ZP-1753207007-7
+2025-07-23 01:20:15 - Status updated to success for Order ID: ZP-1753207007-7
