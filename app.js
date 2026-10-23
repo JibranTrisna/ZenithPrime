@@ -13,7 +13,7 @@ const hpp = require('hpp');
 dotenv.config();
 
 const db = require('./src/config/database');
-const { globalLimiter, sqlInjectionDetector } = require('./src/middlewares/securityMiddleware');
+const { globalLimiter, sqlInjectionDetector, xssSanitizer, originValidator } = require('./src/middlewares/securityMiddleware');
 const aiChatbotService = require('./src/services/aiChatbotService');
 
 // Pastikan tabel cs_tickets selalu terinisialisasi
@@ -124,6 +124,12 @@ app.use(express.json({ limit: '50kb' }));
 
 // Cegah HTTP Parameter Pollution (?status=a&status=b)
 app.use(hpp());
+
+// Sanitasi XSS pada Body, Query, dan Params (Defense-in-Depth)
+app.use(xssSanitizer);
+
+// Validasi Origin / Referer anti-CSRF untuk request mutating (POST, PUT, DELETE)
+app.use(originValidator);
 
 // Blokir pola SQL Injection yang jelas berbahaya
 app.use(sqlInjectionDetector);
@@ -623,7 +629,7 @@ app.use((err, req, res, next) => {
 server.listen(PORT, () => {
     console.log(`--------------------------------------------------`);
     console.log(`🚀 Server & Socket.io ZenithPrime berjalan di http://localhost:${PORT}`);
-    console.log(`🛡️  Security: Helmet/CSP, Rate Limiter, SQLi Shield, HPP, Secure Session, Socket Auth`);
+    console.log(`🛡️  Security: Helmet/CSP, Rate Limiter, SQLi Shield, HPP, Secure Session, Socket Auth, XSS Sanitizer, Anti-CSRF, Account Lockout, Audit Log`);
     console.log(`📅 Waktu Mulai: ${new Date().toLocaleString()}`);
     console.log(`--------------------------------------------------`);
 });

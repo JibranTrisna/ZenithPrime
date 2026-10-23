@@ -7,7 +7,8 @@
 node_modules/
 /vendor/
 
-# Logs
+# Logs & Audit Traces
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -24,4 +25,4 @@ desktop.ini
 
 # Tailwind & Sourcemaps
 /public/css/*.map
-*.map
+*.map

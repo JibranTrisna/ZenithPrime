@@ -1,6 +1,8 @@
 const UserModel = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const { accountLockoutManager, validatePasswordStrength } = require('../middlewares/securityMiddleware');
+const { logSecurityEvent, SEVERITY } = require('../utils/securityLogger');
 
 exports.getLoginPage = (req, res) => {
     if (req.session.user) {
@@ -37,6 +39,13 @@ exports.registerProcess = async (req, res) => {
             return res.redirect('/auth/register');
         }
 
+        // Validasi kebijakan kekuatan password
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.valid) {
+            req.flash('error_msg', passwordValidation.message);
+            return res.redirect('/auth/register');
+        }
+
         const checkEmail = await UserModel.findByEmailOrPhone(email);
         const checkPhone = await UserModel.findByEmailOrPhone(phone);
 
@@ -55,6 +64,8 @@ exports.registerProcess = async (req, res) => {
             password: hashedPassword
         });
 
+        logSecurityEvent('USER_REGISTERED', `Pendaftaran user baru berhasil: ${email} (${phone})`, req, SEVERITY.INFO);
+
         req.flash('success_msg', 'Registrasi berhasil! Silakan login.');
         res.redirect('/auth/login');
 
@@ -69,10 +80,27 @@ exports.loginProcess = async (req, res) => {
     const { identifier, password } = req.body;
 
     try {
+        if (!identifier || !password) {
+            req.flash('error_msg', 'Email/No. HP dan Password wajib diisi.');
+            return res.redirect('/auth/login');
+        }
+
+        // 🛡️ 1. Cek status lockout akun (Anti Brute-Force)
+        const lockoutStatus = accountLockoutManager.isAccountLocked(identifier);
+        if (lockoutStatus.locked) {
+            logSecurityEvent('ACCOUNT_LOCKED_ATTEMPT', `Percobaan login ke akun terkunci: "${identifier}"`, req, SEVERITY.ALERT);
+            req.flash('error_msg', `Akun ini terkunci sementara karena terlalu banyak percobaan gagal. Silakan tunggu ${lockoutStatus.remainingMinutes} menit demi keamanan.`);
+            return res.redirect('/auth/login');
+        }
+
         const users = await UserModel.findByEmailOrPhone(identifier);
 
         if (users.length === 0) {
-            req.flash('error_msg', 'Akun tidak ditemukan.');
+            const remaining = accountLockoutManager.recordFailedAttempt(identifier, req);
+            const alertMsg = remaining <= 0 
+                ? 'Terlalu banyak percobaan gagal. Akun telah dikunci sementara selama 15 menit.' 
+                : `Akun tidak ditemukan atau password salah. (Sisa percobaan: ${remaining})`;
+            req.flash('error_msg', alertMsg);
             return res.redirect('/auth/login');
         }
 
@@ -80,9 +108,16 @@ exports.loginProcess = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            req.flash('error_msg', 'Password salah!');
+            const remaining = accountLockoutManager.recordFailedAttempt(identifier, req);
+            const alertMsg = remaining <= 0 
+                ? 'Terlalu banyak percobaan gagal. Akun telah dikunci sementara selama 15 menit.' 
+                : `Password salah! Sisa percobaan: ${remaining}`;
+            req.flash('error_msg', alertMsg);
             return res.redirect('/auth/login');
         }
+
+        // 🛡️ 2. Login Sukses: Reset counter kegagalan
+        accountLockoutManager.resetFailedAttempts(identifier);
 
         // Buat ulang ID sesi setelah login berhasil → mencegah Session Fixation
         await new Promise((resolve, reject) => {
@@ -95,6 +130,8 @@ exports.loginProcess = async (req, res) => {
             email: user.email,
             role: user.role
         };
+
+        logSecurityEvent('AUTH_SUCCESS', `Login berhasil untuk User ID: ${user.id} (${user.email}), Role: ${user.role}`, req, SEVERITY.INFO);
 
         req.flash('success_msg', `Selamat datang kembali, ${user.name}!`);
 
@@ -112,6 +149,9 @@ exports.loginProcess = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
+    const userEmail = req.session?.user?.email || 'Unknown';
+    logSecurityEvent('AUTH_LOGOUT', `User logout: ${userEmail}`, req, SEVERITY.INFO);
+
     req.session.destroy((err) => {
         if (err) {
             console.error("Gagal logout:", err);
@@ -158,6 +198,8 @@ exports.forgotPasswordProcess = async (req, res) => {
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
         await UserModel.createPasswordReset(user.email, token, expiresAt);
+
+        logSecurityEvent('PASSWORD_RESET_REQUESTED', `Token pemulihan password dibuat untuk: ${user.email}`, req, SEVERITY.INFO);
 
         const resetLink = `${req.protocol}://${req.get('host')}/auth/reset-password/${token}`;
         console.log(`\n🔑 [PASSWORD RESET LINK UNTUK ${user.email}]:\n${resetLink}\n`);
@@ -211,8 +253,10 @@ exports.resetPasswordProcess = async (req, res) => {
             return res.redirect('/auth/forgot-password');
         }
 
-        if (!password || password.length < 6) {
-            req.flash('error_msg', 'Password minimal 6 karakter!');
+        // Validasi kebijakan kekuatan password
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.valid) {
+            req.flash('error_msg', passwordValidation.message);
             return res.redirect(`/auth/reset-password/${token}`);
         }
 
@@ -227,6 +271,11 @@ exports.resetPasswordProcess = async (req, res) => {
         await UserModel.updatePassword(resetEntry.user_id, hashedPassword);
         // Hapus token setelah berhasil digunakan (single-use)
         await UserModel.deletePasswordReset(resetEntry.email);
+
+        // Reset kegagalan login sebelumnya jika ada
+        accountLockoutManager.resetFailedAttempts(resetEntry.email);
+
+        logSecurityEvent('PASSWORD_RESET_SUCCESS', `Password berhasil direset untuk email: ${resetEntry.email}`, req, SEVERITY.INFO);
 
         req.flash('success_msg', 'Password berhasil diperbarui! Silakan login dengan password baru.');
         res.redirect('/auth/login');
