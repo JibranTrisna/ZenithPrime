@@ -1,0 +1,503 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="space-y-8">
+    
+    <!-- Top Header Banner & Server Monitor -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-[#0e0e13] via-[#14141c] to-[#0e0e13] border border-white/10 shadow-2xl relative overflow-hidden">
+        <div class="absolute -top-24 -left-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    Control Center
+                </span>
+                <span class="text-xs text-slate-500">•</span>
+                <span class="text-xs text-slate-400 font-mono">ZenithPrime v2.4</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                Admin Command Center
+            </h1>
+            <p class="text-slate-400 text-xs md:text-sm mt-1">Real-time telemetri finansial, katalog game, dan status antrian transaksi.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 relative z-10">
+            <!-- Server Live Pulse Indicator -->
+            <div class="flex items-center gap-2.5 bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 shadow-inner">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
+                </span>
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sync Status</span>
+                    <span class="text-xs text-emerald-400 font-mono font-semibold" id="last-updated">Updating...</span>
+                </div>
+            </div>
+
+            <!-- Manual Refresh Button -->
+            <button onclick="fetchDashboardData()" class="p-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition group" title="Refresh Data Sekarang">
+                <svg class="w-4 h-4 transition group-hover:rotate-180 duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Action Navigation Toolbar -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <a href="/admin/transactions" class="flex items-center gap-3 p-3.5 rounded-2xl bg-[#0e0e13]/80 hover:bg-white/5 border border-white/10 hover:border-cyan-500/30 transition group">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-lg group-hover:scale-110 transition">
+                💳
+            </div>
+            <div>
+                <div class="text-xs font-bold text-white group-hover:text-cyan-400 transition">Transaksi</div>
+                <div class="text-[10px] text-slate-400">Semua Order</div>
+            </div>
+        </a>
+
+        <a href="/admin/games" class="flex items-center gap-3 p-3.5 rounded-2xl bg-[#0e0e13]/80 hover:bg-white/5 border border-white/10 hover:border-indigo-500/30 transition group">
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-lg group-hover:scale-110 transition">
+                🎮
+            </div>
+            <div>
+                <div class="text-xs font-bold text-white group-hover:text-indigo-400 transition">Katalog Game</div>
+                <div class="text-[10px] text-slate-400">Produk & Nominal</div>
+            </div>
+        </a>
+
+        <a href="/admin/joki" class="flex items-center gap-3 p-3.5 rounded-2xl bg-[#0e0e13]/80 hover:bg-white/5 border border-white/10 hover:border-amber-500/30 transition group">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-lg group-hover:scale-110 transition">
+                ⚔️
+            </div>
+            <div>
+                <div class="text-xs font-bold text-white group-hover:text-amber-400 transition">Jasa Joki</div>
+                <div class="text-[10px] text-slate-400">Kelola Order & Paket</div>
+            </div>
+        </a>
+
+        <a href="/admin/promos" class="flex items-center gap-3 p-3.5 rounded-2xl bg-[#0e0e13]/80 hover:bg-white/5 border border-white/10 hover:border-pink-500/30 transition group">
+            <div class="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 text-lg group-hover:scale-110 transition">
+                🎟️
+            </div>
+            <div>
+                <div class="text-xs font-bold text-white group-hover:text-pink-400 transition">Kupon & Promo</div>
+                <div class="text-[10px] text-slate-400">Diskon Voucher</div>
+            </div>
+        </a>
+
+        <a href="/admin/updates" class="flex items-center gap-3 p-3.5 rounded-2xl bg-[#0e0e13]/80 hover:bg-white/5 border border-white/10 hover:border-purple-500/30 transition group col-span-2 sm:col-span-1">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-lg group-hover:scale-110 transition">
+                📢
+            </div>
+            <div>
+                <div class="text-xs font-bold text-white group-hover:text-purple-400 transition">Berita & Notice</div>
+                <div class="text-[10px] text-slate-400">Publish Info</div>
+            </div>
+        </a>
+    </div>
+
+    <!-- 6 KPI Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <!-- Card 1: Total Omset -->
+        <div class="p-5 rounded-2xl bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 relative overflow-hidden group hover:border-cyan-500/40 transition-all duration-300">
+            <div class="absolute -right-4 -top-4 w-16 h-16 bg-cyan-500/10 rounded-full blur-xl group-hover:bg-cyan-500/20 transition"></div>
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Gross Revenue</span>
+                <span class="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 text-xs">💰</span>
+            </div>
+            <h3 class="text-xl font-mono font-black text-cyan-400 truncate" id="stat-revenue">Rp 0</h3>
+            <p class="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+                <span>Total Omset Masuk</span>
+            </p>
+        </div>
+
+        <!-- Card 2: Keuntungan Bersih -->
+        <div class="p-5 rounded-2xl bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300">
+            <div class="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition"></div>
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Net Profit</span>
+                <span class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs">📈</span>
+            </div>
+            <h3 class="text-xl font-mono font-black text-emerald-400 truncate" id="stat-profit">Rp 0</h3>
+            <p class="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+                <span>Harga Jual - Modal</span>
+            </p>
+        </div>
+
+        <!-- Card 3: Potensi Rugi -->
+        <div class="p-5 rounded-2xl bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 relative overflow-hidden group hover:border-red-500/40 transition-all duration-300">
+            <div class="absolute -right-4 -top-4 w-16 h-16 bg-red-500/10 rounded-full blur-xl group-hover:bg-red-500/20 transition"></div>
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Expired / Loss</span>
+                <span class="p-1.5 rounded-lg bg-red-500/10 text-red-400 text-xs">⚠️</span>
+            </div>
+            <h3 class="text-xl font-mono font-black text-red-400 truncate" id="stat-loss">Rp 0</h3>
+            <p class="text-[10px] text-slate-500 mt-1">Order Gagal / Batal</p>
+        </div>
+
+        <!-- Card 4: Butuh Proses / Pending -->
+        <div class="p-5 rounded-2xl bg-[#0e0e13]/80 backdrop-blur-xl border border-amber-500/30 relative overflow-hidden group shadow-[0_0_20px_rgba(245,158,11,0.08)] hover:border-amber-500/50 transition-all duration-300">
+            <div class="absolute -right-4 -top-4 w-16 h-16 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition"></div>
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400">Butuh Proses</span>
+                <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs animate-pulse">⏳</span>
+            </div>
+            <h3 class="text-2xl font-mono font-black text-white" id="stat-pending">0</h3>
+            <p class="text-[10px] text-amber-400/80 mt-1">Pending Approval</p>
+        </div>
+
+        <!-- Card 5: Total User -->
+        <div class="p-5 rounded-2xl bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 relative overflow-hidden group hover:border-purple-500/40 transition-all duration-300">
+            <div class="absolute -right-4 -top-4 w-16 h-16 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition"></div>
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">User Terdaftar</span>
+                <span class="p-1.5 rounded-lg bg-purple-500/10 text-purple-400 text-xs">👥</span>
+            </div>
+            <h3 class="text-2xl font-mono font-black text-purple-400" id="stat-users">0</h3>
+            <p class="text-[10px] text-slate-500 mt-1">Akun Member Aktif</p>
+        </div>
+
+        <!-- Card 6: Game Aktif -->
+        <div class="p-5 rounded-2xl bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 relative overflow-hidden group hover:border-blue-500/40 transition-all duration-300">
+            <div class="absolute -right-4 -top-4 w-16 h-16 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition"></div>
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Game Aktif</span>
+                <span class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 text-xs">🕹️</span>
+            </div>
+            <h3 class="text-2xl font-mono font-black text-blue-400" id="stat-games">0</h3>
+            <p class="text-[10px] text-slate-500 mt-1">Katalog Siap Order</p>
+        </div>
+    </div>
+
+    <!-- Analytics Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Hourly Trend Chart -->
+        <div class="bg-[#0e0e13]/80 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl relative">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-bold text-white text-base flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
+                        Tren Penjualan (Hari Ini)
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Pantauan grafik omset transaksi per jam</p>
+                </div>
+                <span class="text-xs font-mono font-semibold bg-cyan-500/10 text-cyan-400 px-3 py-1.5 rounded-xl border border-cyan-500/20">
+                    24-Hour Timeline
+                </span>
+            </div>
+            <div class="h-[280px] w-full">
+                <canvas id="hourlyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Daily Bar Chart -->
+        <div class="bg-[#0e0e13]/80 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl relative">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-bold text-white text-base flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-[0_0_8px_#c084fc]"></span>
+                        Statistik Harian (Bulan Ini)
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Akumulasi pendapatan harian dalam kalender berjalan</p>
+                </div>
+                <span class="text-xs font-mono font-semibold bg-purple-500/10 text-purple-400 px-3 py-1.5 rounded-xl border border-purple-500/20">
+                    Monthly Overview
+                </span>
+            </div>
+            <div class="h-[280px] w-full">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Incoming Transactions Feed -->
+    <div class="bg-[#0e0e13]/80 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+        <div class="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-white/[0.02] to-transparent">
+            <div>
+                <h3 class="font-bold text-white text-lg flex items-center gap-2">
+                    <span class="text-indigo-400">⚡</span> Transaksi Baru Masuk
+                </h3>
+                <p class="text-slate-400 text-xs mt-0.5">10 transaksi teranyar yang terdata ke sistem</p>
+            </div>
+            <a href="/admin/transactions" class="inline-flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 font-bold bg-cyan-500/10 hover:bg-cyan-500/20 px-4 py-2 rounded-xl border border-cyan-500/20 transition">
+                <span>Buka Semua Transaksi</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-white/5 text-slate-400 uppercase font-bold text-[11px] tracking-wider border-b border-white/5">
+                    <tr>
+                        <th class="px-6 py-4">Order ID</th>
+                        <th class="px-6 py-4">Pelanggan</th>
+                        <th class="px-6 py-4">Item Produk</th>
+                        <th class="px-6 py-4">Nominal</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5" id="recent-orders-body">
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-slate-500">
+                            <div class="inline-flex items-center gap-2">
+                                <span class="animate-spin w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full"></span>
+                                <span>Memuat data transaksi terkini...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Copy Feedback Toast Notification -->
+<div id="copyToast" class="fixed bottom-6 right-6 z-50 bg-[#18181b] border border-cyan-500/40 text-cyan-400 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 text-xs font-semibold">
+    <span>📋</span>
+    <span id="copyToastText">Berhasil disalin ke clipboard!</span>
+</div>
+
+<script>
+    let hourlyChartInstance = null;
+    let dailyChartInstance = null;
+
+    const formatRupiah = (number) => {
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number || 0);
+    };
+
+    function copyToClipboard(text, label) {
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById('copyToast');
+            const toastText = document.getElementById('copyToastText');
+            toastText.textContent = `${label || 'ID'} "${text}" disalin!`;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 2500);
+        });
+    }
+
+    async function fetchDashboardData() {
+        try {
+            document.getElementById('last-updated').innerText = 'Updating...';
+            
+            const response = await fetch('/admin/api/stats');
+            const data = await response.json();
+
+            document.getElementById('stat-revenue').innerText = formatRupiah(data.stats.revenue);
+            document.getElementById('stat-profit').innerText = formatRupiah(data.stats.profit);
+            document.getElementById('stat-loss').innerText = formatRupiah(data.stats.loss);
+            document.getElementById('stat-users').innerText = (data.stats.users || 0).toLocaleString('id-ID');
+            document.getElementById('stat-games').innerText = (data.stats.games || 0).toLocaleString('id-ID');
+            document.getElementById('stat-pending').innerText = (data.stats.pending || 0).toLocaleString('id-ID');
+
+            const tbody = document.getElementById('recent-orders-body');
+            tbody.innerHTML = '';
+
+            if (!data.recentOrders || data.recentOrders.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-slate-500">
+                            <div class="text-3xl mb-2">📭</div>
+                            <div class="font-bold text-white text-sm">Belum Ada Transaksi</div>
+                            <div class="text-xs text-slate-500 mt-0.5">Semua transaksi terbaru akan otomatis tampil di sini.</div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                data.recentOrders.forEach(t => {
+                    const statusConfig = {
+                        success: { class: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20', icon: '✓', label: 'Sukses' },
+                        pending: { class: 'bg-amber-500/10 text-amber-400 border border-amber-500/20', icon: '⏳', label: 'Pending' },
+                        failed: { class: 'bg-red-500/10 text-red-400 border border-red-500/20', icon: '✕', label: 'Gagal' },
+                        settlement: { class: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20', icon: '✓', label: 'Sukses' }
+                    };
+                    const badge = statusConfig[t.status] || { class: 'bg-slate-500/10 text-slate-400 border border-white/10', icon: '•', label: t.status };
+                    
+                    const row = `
+                        <tr class="hover:bg-white/[0.03] transition group">
+                            <td class="px-6 py-4 font-mono font-bold text-white">
+                                <div class="flex items-center gap-2">
+                                    <span>#${t.id}</span>
+                                    <button onclick="copyToClipboard('${t.id}', 'Order ID')" class="text-slate-500 hover:text-cyan-400 text-[11px] transition" title="Salin Order ID">
+                                        📋
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-white flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-full bg-white/10 text-slate-300 text-[10px] flex items-center justify-center font-bold">
+                                        ${(t.user_name || 'U').charAt(0).toUpperCase()}
+                                    </span>
+                                    <span>${t.user_name || 'Guest User'}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-slate-200">${t.product_name || 'Item Digital'}</div>
+                            </td>
+                            <td class="px-6 py-4 font-mono font-bold text-cyan-400">
+                                ${formatRupiah(t.amount)}
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${badge.class}">
+                                    <span>${badge.icon}</span>
+                                    <span class="uppercase">${badge.label}</span>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="/admin/transactions" class="text-xs text-indigo-400 hover:text-indigo-300 font-bold hover:underline">
+                                    Detail &rarr;
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            }
+
+            updateCharts(data.charts);
+
+            const now = new Date();
+            document.getElementById('last-updated').innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+
+        } catch (error) {
+            console.error("Gagal update dashboard:", error);
+            document.getElementById('last-updated').innerText = 'Offline / Error';
+        }
+    }
+
+    function updateCharts(chartsData) {
+        if (!chartsData) return;
+        const ctx1 = document.getElementById('hourlyChart').getContext('2d');
+        const ctx2 = document.getElementById('dailyChart').getContext('2d');
+
+        if (hourlyChartInstance) hourlyChartInstance.destroy();
+        
+        const gradientHourly = ctx1.createLinearGradient(0, 0, 0, 300);
+        gradientHourly.addColorStop(0, 'rgba(6, 182, 212, 0.4)');
+        gradientHourly.addColorStop(1, 'rgba(6, 182, 212, 0)');
+
+        hourlyChartInstance = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: chartsData.hourly.labels,
+                datasets: [{
+                    label: 'Omset (Rp)',
+                    data: chartsData.hourly.data,
+                    borderColor: '#22d3ee',
+                    backgroundColor: gradientHourly,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#060608',
+                    pointBorderColor: '#22d3ee',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#18181b',
+                        titleColor: '#fff',
+                        bodyColor: '#22d3ee',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return 'Omset: ' + formatRupiah(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { 
+                            color: '#94a3b8',
+                            font: { size: 10 },
+                            callback: function(value) {
+                                if (value >= 1000000) return 'Rp ' + (value/1000000).toFixed(1) + 'M';
+                                if (value >= 1000) return 'Rp ' + (value/1000).toFixed(0) + 'k';
+                                return value;
+                            }
+                        }
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8', font: { size: 10 }, maxTicksLimit: 8 }
+                    }
+                }
+            }
+        });
+
+        if (dailyChartInstance) dailyChartInstance.destroy();
+
+        dailyChartInstance = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: chartsData.daily.labels,
+                datasets: [{
+                    label: 'Omset Harian',
+                    data: chartsData.daily.data,
+                    backgroundColor: '#a855f7',
+                    borderRadius: 6,
+                    hoverBackgroundColor: '#c084fc'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#18181b',
+                        titleColor: '#fff',
+                        bodyColor: '#c084fc',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return 'Omset: ' + formatRupiah(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { 
+                            color: '#94a3b8',
+                            font: { size: 10 },
+                            callback: function(value) {
+                                if (value >= 1000000) return 'Rp ' + (value/1000000).toFixed(1) + 'M';
+                                if (value >= 1000) return 'Rp ' + (value/1000).toFixed(0) + 'k';
+                                return value;
+                            }
+                        }
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8', font: { size: 10 } }
+                    }
+                }
+            }
+        });
+    }
+
+    fetchDashboardData();
+    setInterval(fetchDashboardData, 30000); // 30s auto-refresh
+</script>

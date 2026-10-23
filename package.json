@@ -1,0 +1,42 @@
+{
+  "name": "zenithprime",
+  "version": "1.0.0",
+  "description": "Website Top Up Game menggunakan Node.js, MySQL, dan Midtrans",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "mysql",
+    "topup",
+    "midtrans",
+    "game"
+  ],
+  "author": "ZenithPrime Team",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "connect-flash": "^0.1.1",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-rate-limit": "^8.7.1",
+    "express-session": "^1.17.3",
+    "helmet": "^8.3.0",
+    "hpp": "^0.2.3",
+    "midtrans-client": "^1.3.1",
+    "moment": "^2.30.1",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.6.5",
+    "node-cron": "^4.2.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

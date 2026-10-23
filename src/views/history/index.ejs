@@ -1,0 +1,321 @@
+<div class="max-w-6xl mx-auto py-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 reveal">
+        <div>
+            <h1 class="text-3xl font-bold text-white">Riwayat <span class="text-cyan-400">Transaksi & Joki</span></h1>
+            <p class="text-slate-400 text-sm mt-1">Pantau status top up, progress live joki, dan ulasan transaksi.</p>
+        </div>
+        <div class="flex items-center gap-2.5">
+            <button onclick="window.location.reload()" title="Sinkronisasi status otomatis dengan Midtrans Sandbox" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-semibold transition group">
+                <svg class="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span>Auto-Sync Midtrans</span>
+            </button>
+            <div class="bg-[#18181b] px-4 py-2 rounded-xl border border-white/10 text-xs text-slate-300">
+                Total Order: <span class="text-white font-bold"><%= orders.length + (typeof jokiOrders !== 'undefined' ? jokiOrders.length : 0) %></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Selector -->
+    <div class="flex items-center gap-3 mb-6">
+        <button onclick="switchTab('topup')" id="tabBtnTopup" class="px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20">
+            <span>💎</span>
+            <span>Top Up Game</span>
+            <span class="px-2 py-0.5 rounded-full bg-black/30 text-[10px]"><%= orders.length %></span>
+        </button>
+        <button onclick="switchTab('joki')" id="tabBtnJoki" class="px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-[#18181b] border border-white/10 text-slate-400 hover:text-white hover:border-white/20">
+            <span>🛡️</span>
+            <span>Jasa Joki</span>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px]"><%= typeof jokiOrders !== 'undefined' ? jokiOrders.length : 0 %></span>
+        </button>
+    </div>
+
+    <!-- Tab Content 1: Top Up Orders -->
+    <div id="contentTopup" class="bg-[#18181b] border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative min-h-[300px]">
+        <% if (orders.length === 0) { %>
+            <div class="py-16 px-4 flex flex-col items-center justify-center text-center">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-800 mb-4">
+                    <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Belum ada transaksi Top Up</h3>
+                <p class="text-slate-400 text-xs mb-6 max-w-sm">Jelajahi ratusan katalog game favoritmu dan nikmati promo diskon spesial hari ini.</p>
+                <a href="/games" class="px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-full font-bold transition shadow-lg shadow-cyan-500/20 text-sm">Mulai Top Up</a>
+            </div>
+        <% } else { %>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-400">
+                    <thead class="bg-white/5 text-white uppercase font-bold text-xs border-b border-white/5">
+                        <tr>
+                            <th class="px-6 py-5">Game & Item</th>
+                            <th class="px-6 py-5">Detail Akun</th>
+                            <th class="px-6 py-5">Harga</th>
+                            <th class="px-6 py-5 text-center">Status</th>
+                            <th class="px-6 py-5 text-center">Aksi / Ulasan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        <% orders.forEach(order => { %>
+                        <tr class="hover:bg-white/5 transition group" id="row-<%= order.order_id %>">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0">
+                                        <img src="/images/games/<%= order.thumbnail %>" class="w-full h-full object-cover" onerror="this.src='/images/ZenithPrimeLogoTransparant.png'">
+                                    </div>
+                                    <div>
+                                        <div class="text-white font-bold group-hover:text-cyan-400 transition"><%= order.product_name %></div>
+                                        <div class="text-xs text-slate-500"><%= order.game_name %></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 font-mono text-xs">
+                                <div class="text-white">ID: <%= order.target_id %></div>
+                                <% if (order.zone_id) { %>
+                                    <div class="text-slate-500">Zone: <%= order.zone_id %></div>
+                                <% } %>
+                                <div class="text-[10px] text-slate-600 mt-1 select-all">TRX: <%= order.order_id %></div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-white font-bold">Rp <%= Number(order.amount).toLocaleString('id-ID') %></span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <% if (order.status === 'success') { %>
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 text-xs font-bold">Sukses</span>
+                                <% } else if (order.status === 'pending') { %>
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs font-bold">Pending</span>
+                                <% } else { %>
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold">Gagal</span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 text-center min-w-[150px]">
+                                <% if (order.status === 'pending') { %>
+                                    <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                                        <a href="/transaction/checkout/<%= order.order_id %>" class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-lg shadow-cyan-500/20 whitespace-nowrap">Lanjut Bayar</a>
+                                        <button onclick="syncHistoryOrder('<%= order.order_id %>', this)" title="Cek status Midtrans" class="p-1.5 px-2 bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                            <span>Sync</span>
+                                        </button>
+                                    </div>
+                                <% } else if (order.status === 'success') { %>
+                                    
+                                    <% if (order.review_id) { %>
+                                        <div class="flex flex-col items-center">
+                                            <div class="flex text-yellow-400 text-xs gap-0.5 mb-1 bg-yellow-400/10 px-2 py-1 rounded-lg border border-yellow-400/20">
+                                                <% for(let i=0; i<5; i++) { %>
+                                                    <span><%= i < order.review_rating ? '★' : '☆' %></span>
+                                                <% } %>
+                                            </div>
+                                            <% if (order.review_comment) { %>
+                                                <p class="text-[10px] text-slate-400 italic text-center leading-tight line-clamp-2 max-w-[140px]">"<%= order.review_comment %>"</p>
+                                            <% } %>
+                                        </div>
+                                    <% } else { %>
+                                        <button onclick="openReviewModal('<%= order.order_id %>', '<%= order.game_name %> - <%= order.product_name %>')" 
+                                                class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 mx-auto whitespace-nowrap shadow-lg shadow-purple-500/20">
+                                            <span>★</span> Beri Ulasan
+                                        </button>
+                                    <% } %>
+
+                                <% } else { %>
+                                    <span class="text-slate-600 text-xs italic">No Action</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Tab Content 2: Joki Orders -->
+    <div id="contentJoki" class="hidden bg-[#18181b] border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative min-h-[300px]">
+        <% if (typeof jokiOrders === 'undefined' || jokiOrders.length === 0) { %>
+            <div class="py-16 px-4 flex flex-col items-center justify-center text-center">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-4 text-indigo-400">
+                    <span class="text-3xl">🛡️</span>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Belum ada pesanan Jasa Joki</h3>
+                <p class="text-slate-400 text-xs mb-6 max-w-sm">Menaikkan rank kini makin gampang dengan penjoki pro tier Radiant & Immortal. 100% garansi aman & anti-minus.</p>
+                <a href="/joki" class="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white rounded-full font-bold transition shadow-lg shadow-cyan-500/20 text-sm">Pesan Jasa Joki</a>
+            </div>
+        <% } else { %>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-400">
+                    <thead class="bg-white/5 text-white uppercase font-bold text-xs border-b border-white/5">
+                        <tr>
+                            <th class="px-6 py-5">Layanan Joki</th>
+                            <th class="px-6 py-5">Detail Akun & Req</th>
+                            <th class="px-6 py-5">Total Biaya</th>
+                            <th class="px-6 py-5 text-center">Status Joki</th>
+                            <th class="px-6 py-5 text-center">Aksi / Tracking</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        <% jokiOrders.forEach(joki => { %>
+                        <tr class="hover:bg-white/5 transition group">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg overflow-hidden border border-white/10 shrink-0">
+                                        <img src="/images/games/<%= joki.game_thumbnail %>" class="w-full h-full object-cover" onerror="this.src='/images/ZenithPrimeLogoTransparant.png'">
+                                    </div>
+                                    <div>
+                                        <div class="text-white font-bold group-hover:text-cyan-400 transition"><%= joki.service_name || (joki.current_rank && joki.target_rank ? joki.current_rank + ' ➔ ' + joki.target_rank : 'Custom Request Joki') %></div>
+                                        <div class="text-xs text-slate-500 flex items-center gap-1.5 flex-wrap mt-1">
+                                            <span><%= joki.game_name %></span>
+                                            <% if (joki.request_type) { %>
+                                                <span class="px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-mono text-[10px]"><%= joki.request_type %></span>
+                                            <% } %>
+                                            <% if (joki.play_mode === 'party') { %>
+                                                <span class="px-1.5 py-0.5 rounded bg-purple-500/10 border border-purple-500/20 text-purple-300 font-mono text-[10px]">🎮 Mabar Pro</span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-xs font-mono">
+                                <div class="text-white"><%= joki.play_mode === 'party' ? 'Mode: Mabar Party (No Pass)' : 'Login: ' + (joki.login_via || '-').toUpperCase() %></div>
+                                <div class="text-slate-400">ID / Nick: <%= joki.account_id %> <%= joki.nickname ? '(' + joki.nickname + ')' : '' %></div>
+                                <% if (joki.current_rank && joki.target_rank) { %>
+                                    <div class="text-[11px] text-cyan-300 font-sans mt-0.5 font-bold">🎯 <%= joki.current_rank %> ➔ <%= joki.target_rank %></div>
+                                <% } %>
+                                <% if (joki.request_hero) { %>
+                                    <div class="text-[10px] text-amber-400 mt-0.5">Hero: <%= joki.request_hero %></div>
+                                <% } %>
+                                <div class="text-[10px] text-slate-600 mt-1 select-all">Order: <%= joki.order_id %></div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-white font-bold">Rp <%= Number(joki.total_amount).toLocaleString('id-ID') %></span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <% if (joki.payment_status !== 'success') { %>
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs font-bold">Menunggu Bayar</span>
+                                <% } else if (joki.order_status === 'queued') { %>
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-bold">Antrian Penjoki</span>
+                                <% } else if (joki.order_status === 'in_progress') { %>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-bold animate-pulse">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                                        Sedang Dikerjakan
+                                    </span>
+                                <% } else if (joki.order_status === 'completed') { %>
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">Selesai 🎉</span>
+                                <% } else { %>
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold">Dibatalkan</span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 text-center min-w-[150px]">
+                                <% if (joki.payment_status === 'pending') { %>
+                                    <a href="/joki/checkout/<%= joki.order_id %>" class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-lg shadow-cyan-500/20 whitespace-nowrap inline-block">Bayar Sekarang</a>
+                                <% } else { %>
+                                    <a href="/joki/status/<%= joki.order_id %>" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-300 hover:text-white text-xs font-bold transition">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        <span>Live Progress</span>
+                                    </a>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Review Modal for Top Up -->
+<div id="reviewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-[#18181b] w-full max-w-md rounded-2xl border border-white/10 p-6 shadow-2xl relative overflow-hidden">
+        <button onclick="closeReviewModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white transition">✕</button>
+        <h3 class="text-xl font-bold text-white mb-1">Beri Ulasan</h3>
+        <p class="text-slate-400 text-xs mb-6 font-mono" id="reviewItemName">Item Name</p>
+
+        <form action="/reviews/submit" method="POST" class="space-y-6">
+            <input type="hidden" name="order_id" id="reviewOrderId">
+            
+            <div class="flex flex-col items-center gap-2">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Kepuasan Anda</span>
+                <div class="flex flex-row-reverse gap-2 group/stars">
+                    <input type="radio" id="star5" name="rating" value="5" class="peer/5 hidden" required />
+                    <label for="star5" class="text-3xl text-slate-700 cursor-pointer transition-colors peer-checked/5:text-yellow-400 hover:text-yellow-400 peer-hover/5:text-yellow-400">★</label>
+                    <input type="radio" id="star4" name="rating" value="4" class="peer/4 hidden" />
+                    <label for="star4" class="text-3xl text-slate-700 cursor-pointer transition-colors peer-checked/4:text-yellow-400 hover:text-yellow-400 peer-hover/4:text-yellow-400 peer-checked/5:text-yellow-400 peer-hover/5:text-yellow-400">★</label>
+                    <input type="radio" id="star3" name="rating" value="3" class="peer/3 hidden" />
+                    <label for="star3" class="text-3xl text-slate-700 cursor-pointer transition-colors peer-checked/3:text-yellow-400 hover:text-yellow-400 peer-hover/3:text-yellow-400 peer-checked/4:text-yellow-400 peer-hover/4:text-yellow-400 peer-checked/5:text-yellow-400 peer-hover/5:text-yellow-400">★</label>
+                    <input type="radio" id="star2" name="rating" value="2" class="peer/2 hidden" />
+                    <label for="star2" class="text-3xl text-slate-700 cursor-pointer transition-colors peer-checked/2:text-yellow-400 hover:text-yellow-400 peer-hover/2:text-yellow-400 peer-checked/3:text-yellow-400 peer-hover/3:text-yellow-400 peer-checked/4:text-yellow-400 peer-hover/4:text-yellow-400 peer-checked/5:text-yellow-400 peer-hover/5:text-yellow-400">★</label>
+                    <input type="radio" id="star1" name="rating" value="1" class="peer/1 hidden" />
+                    <label for="star1" class="text-3xl text-slate-700 cursor-pointer transition-colors peer-checked/1:text-yellow-400 hover:text-yellow-400 peer-hover/1:text-yellow-400 peer-checked/2:text-yellow-400 peer-hover/2:text-yellow-400 peer-checked/3:text-yellow-400 peer-hover/3:text-yellow-400 peer-checked/4:text-yellow-400 peer-hover/4:text-yellow-400 peer-checked/5:text-yellow-400 peer-hover/5:text-yellow-400">★</label>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-slate-400 uppercase block mb-2">Komentar</label>
+                <textarea name="comment" rows="3" class="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white focus:border-purple-500 outline-none resize-none"></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 rounded-xl transition">Kirim Ulasan</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function switchTab(tab) {
+        const topupBtn = document.getElementById('tabBtnTopup');
+        const jokiBtn = document.getElementById('tabBtnJoki');
+        const topupContent = document.getElementById('contentTopup');
+        const jokiContent = document.getElementById('contentJoki');
+
+        if (tab === 'topup') {
+            topupBtn.className = "px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20";
+            jokiBtn.className = "px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-[#18181b] border border-white/10 text-slate-400 hover:text-white hover:border-white/20";
+            topupContent.classList.remove('hidden');
+            jokiContent.classList.add('hidden');
+        } else {
+            jokiBtn.className = "px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20";
+            topupBtn.className = "px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-[#18181b] border border-white/10 text-slate-400 hover:text-white hover:border-white/20";
+            jokiContent.classList.remove('hidden');
+            topupContent.classList.add('hidden');
+        }
+    }
+
+    const modal = document.getElementById('reviewModal');
+    function openReviewModal(orderId, name) {
+        document.getElementById('reviewOrderId').value = orderId;
+        document.getElementById('reviewItemName').innerText = name;
+        modal.classList.remove('hidden');
+    }
+    function closeReviewModal() {
+        modal.classList.add('hidden');
+    }
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeReviewModal(); });
+
+    async function syncHistoryOrder(orderId, btn) {
+        if (!btn) return;
+        const origHTML = btn.innerHTML;
+        btn.innerHTML = `<span class="animate-spin inline-block">↻</span> <span class="hidden sm:inline">Sync...</span>`;
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`/api/transaction/sync/${orderId}`, { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'success') {
+                btn.innerHTML = `✅ Sukses!`;
+                setTimeout(() => window.location.reload(), 700);
+            } else if (data.status === 'expired' || data.status === 'failed') {
+                btn.innerHTML = `❌ ${data.status.toUpperCase()}`;
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                btn.innerHTML = `⏳ Pending`;
+                setTimeout(() => {
+                    btn.innerHTML = origHTML;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        } catch (e) {
+            console.error('Sync error:', e);
+            btn.innerHTML = `⚠️ Gagal`;
+            setTimeout(() => {
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+            }, 2000);
+        }
+    }
+</script>

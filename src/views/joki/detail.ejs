@@ -1,0 +1,1126 @@
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+    <!-- Breadcrumb & Back -->
+    <div class="flex items-center gap-2 text-xs text-slate-400 mb-6">
+        <a href="/joki" class="hover:text-cyan-400 transition flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <span>Katalog Joki</span>
+        </a>
+        <span>/</span>
+        <span class="text-white font-semibold"><%= game.name %></span>
+        <span>/</span>
+        <span class="text-cyan-400 font-mono">Form Request</span>
+    </div>
+
+    <!-- Game Banner Card -->
+    <div class="relative rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-r from-[#121217] via-[#161622] to-[#121217] p-6 sm:p-8 mb-8 shadow-2xl backdrop-blur-xl">
+        <div class="absolute -right-10 -bottom-10 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
+            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-white/10 shrink-0 bg-black/40 p-1.5 shadow-xl">
+                <img src="/images/games/<%= game.thumbnail %>" alt="<%= game.name %>" class="w-full h-full object-cover rounded-xl" onerror="this.src='/images/ZenithPrimeLogoTransparant.png'">
+            </div>
+            <div class="text-center sm:text-left flex-1">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[11px] font-bold uppercase tracking-wider mb-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    Sistem Joki Fleksibel Berbasis Request
+                </div>
+                <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+                    Request Joki <%= game.name %>
+                </h1>
+                <p class="text-slate-400 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
+                    Pesanan dibuat <b>sesuai request spesifik Anda</b>: tentukan rank awal Anda sekarang ke target impian, atur match hero favorit, atau pilih mode mabar party tanpa perlu memberikan password!
+                </p>
+
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-4 text-xs font-semibold text-slate-300">
+                    <span class="flex items-center gap-1.5 text-emerald-400">
+                        <span>🛡️</span> 100% Anti-Minus & Safe
+                    </span>
+                    <span class="flex items-center gap-1.5 text-cyan-400">
+                        <span>⚡</span> Hitung Harga Real-Time
+                    </span>
+                    <span class="flex items-center gap-1.5 text-yellow-400">
+                        <span>👥</span> Bisa Mode Mabar Tanpa Password
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Order Form (Interactive Request Builder) -->
+    <form action="/joki/order" method="POST" id="jokiRequestForm" class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <input type="hidden" name="game_slug" value="<%= game.slug %>">
+        <input type="hidden" name="request_type" id="hiddenRequestType" value="Push Rank">
+        <input type="hidden" name="current_rank" id="hiddenCurrentRank" value="">
+        <input type="hidden" name="target_rank" id="hiddenTargetRank" value="">
+        <input type="hidden" name="play_mode" id="hiddenPlayMode" value="solo">
+        <input type="hidden" name="custom_title" id="hiddenCustomTitle" value="">
+        <input type="hidden" name="quantity" id="hiddenQuantity" value="1">
+        <input type="hidden" name="total_amount" id="hiddenTotalAmount" value="0">
+        <input type="hidden" name="service_id" id="hiddenServiceId" value="0">
+
+        <!-- Left 2 Cols: Step 1, 2, 3 -->
+        <div class="lg:col-span-2 space-y-8">
+
+            <!-- STEP 1: Pilih Tipe Request Joki -->
+            <div class="rounded-3xl bg-[#121217] border border-white/10 p-6 sm:p-8 shadow-xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md">
+                        1
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Tentukan Jenis Request Joki</h3>
+                        <p class="text-slate-400 text-xs">Pilih format joki yang Anda inginkan sesuai kebutuhan akun Anda.</p>
+                    </div>
+                </div>
+
+                <!-- Request Type Selection Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+                    <button type="button" onclick="switchRequestMode('push_rank')" id="btnModePushRank" class="req-mode-btn p-3.5 rounded-2xl border text-left transition-all duration-200 bg-cyan-500/15 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+                        <div class="text-xl mb-1">⚡</div>
+                        <div class="text-white text-xs font-bold leading-tight">Push Rank</div>
+                        <div class="text-slate-400 text-[10px] mt-0.5">Rank Awal ➔ Target</div>
+                    </button>
+
+                    <button type="button" onclick="switchRequestMode('winrate')" id="btnModeWinrate" class="req-mode-btn p-3.5 rounded-2xl border text-left transition-all duration-200 bg-white/[0.03] border-white/10 hover:border-cyan-500/30">
+                        <div class="text-xl mb-1">🎯</div>
+                        <div class="text-white text-xs font-bold leading-tight">GB Winrate / Match</div>
+                        <div class="text-slate-400 text-[10px] mt-0.5">Push Hero Favorit</div>
+                    </button>
+
+                    <button type="button" onclick="switchRequestMode('mabar')" id="btnModeMabar" class="req-mode-btn p-3.5 rounded-2xl border text-left transition-all duration-200 bg-white/[0.03] border-white/10 hover:border-cyan-500/30">
+                        <div class="text-xl mb-1">👥</div>
+                        <div class="text-white text-xs font-bold leading-tight">Joki Mabar Duo</div>
+                        <div class="text-slate-400 text-[10px] mt-0.5">Tanpa Beri Password</div>
+                    </button>
+
+                    <button type="button" onclick="switchRequestMode('custom')" id="btnModeCustom" class="req-mode-btn p-3.5 rounded-2xl border text-left transition-all duration-200 bg-white/[0.03] border-white/10 hover:border-cyan-500/30">
+                        <div class="text-xl mb-1">📝</div>
+                        <div class="text-white text-xs font-bold leading-tight">Custom Request</div>
+                        <div class="text-slate-400 text-[10px] mt-0.5">Quest & Request Bebas</div>
+                    </button>
+                </div>
+
+                <!-- SUB-VIEW 1: PUSH RANK PER REQUEST (KALKULATOR RANK AWAL ➔ TARGET) -->
+                <div id="sectionPushRank" class="space-y-6">
+                    <div class="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-xs text-cyan-200 flex items-center justify-between">
+                        <span>💡 <b>Kalkulator Dinamis:</b> Masukkan posisi rank Anda saat ini dan rank impian. Biaya dan estimasi waktu terhitung otomatis.</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                        <!-- Rank Awal -->
+                        <div class="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <span>🚩</span> Rank Awal Saat Ini
+                                </span>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] text-slate-400 uppercase font-semibold mb-1">Tier / Tingkatan</label>
+                                <select id="inputCurrentTier" onchange="onCurrentTierChange()" class="w-full px-3.5 py-2.5 rounded-xl bg-[#18181b] border border-white/10 text-white text-xs focus:border-cyan-400 outline-none">
+                                    <!-- Populated via JS based on game -->
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3" id="wrapperCurrentSub">
+                                <div id="wrapperCurrentDivCol">
+                                    <label class="block text-[11px] text-slate-400 uppercase font-semibold mb-1" id="labelCurrentDiv">Divisi</label>
+                                    <select id="inputCurrentDiv" onchange="calculateRankDifference()" class="w-full px-3.5 py-2.5 rounded-xl bg-[#18181b] border border-white/10 text-white text-xs focus:border-cyan-400 outline-none">
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                </div>
+                                <div id="wrapperCurrentStarCol">
+                                    <label class="block text-[11px] text-slate-400 uppercase font-semibold mb-1" id="labelCurrentStar">Bintang Saat Ini</label>
+                                    <input type="number" id="inputCurrentStar" value="0" min="0" max="100" oninput="calculateRankDifference()" class="w-full px-3.5 py-2.5 rounded-xl bg-[#18181b] border border-white/10 text-white text-xs focus:border-cyan-400 outline-none font-mono">
+                                    <span class="text-[10px] text-slate-500 mt-1 block" id="hintCurrentStar">Bintang 0-5</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rank Target -->
+                        <div class="p-5 rounded-2xl bg-black/40 border border-cyan-500/30 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <span>🎯</span> Rank Target Impian
+                                </span>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] text-slate-400 uppercase font-semibold mb-1">Tier / Tingkatan Target</label>
+                                <select id="inputTargetTier" onchange="onTargetTierChange()" class="w-full px-3.5 py-2.5 rounded-xl bg-[#18181b] border border-white/10 text-white text-xs focus:border-cyan-400 outline-none">
+                                    <!-- Populated via JS based on game -->
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3" id="wrapperTargetSub">
+                                <div id="wrapperTargetDivCol">
+                                    <label class="block text-[11px] text-slate-400 uppercase font-semibold mb-1" id="labelTargetDiv">Divisi Target</label>
+                                    <select id="inputTargetDiv" onchange="calculateRankDifference()" class="w-full px-3.5 py-2.5 rounded-xl bg-[#18181b] border border-white/10 text-white text-xs focus:border-cyan-400 outline-none">
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                </div>
+                                <div id="wrapperTargetStarCol">
+                                    <label class="block text-[11px] text-slate-400 uppercase font-semibold mb-1" id="labelTargetStar">Bintang Target</label>
+                                    <input type="number" id="inputTargetStar" value="1" min="1" max="100" oninput="calculateRankDifference()" class="w-full px-3.5 py-2.5 rounded-xl bg-[#18181b] border border-white/10 text-white text-xs focus:border-cyan-400 outline-none font-mono">
+                                    <span class="text-[10px] text-slate-500 mt-1 block" id="hintTargetStar">Bintang 1-5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kalkulasi Hasil Visual Card -->
+                    <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs">
+                        <div>
+                            <span class="text-slate-400 block mb-0.5">Jarak Pengerjaan Request:</span>
+                            <span class="text-white font-bold text-sm" id="calcDiffPreview">0 Bintang</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block mb-0.5">Estimasi Pengerjaan:</span>
+                            <span class="text-emerald-400 font-semibold" id="calcTimePreview">1-12 Jam</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block mb-0.5">Biaya Paket Request:</span>
+                            <span class="text-cyan-400 font-extrabold text-base font-mono" id="calcPricePreview">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-VIEW 2: GB WINRATE / HERO MATCH -->
+                <div id="sectionWinrate" class="hidden space-y-4">
+                    <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-200">
+                        🎯 <b>GB Winrate Hero:</b> Naikkan winrate hero kesayangan Anda di mode Classic / Ranked. Pengerjaan fokus pada hero yang Anda minta dengan garansi winrate tinggi.
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Nama Hero / Karakter <span class="text-red-400">*</span></label>
+                            <input type="text" id="inputWrHero" placeholder="Contoh: Fanny, Gusion, Ling, dll." oninput="updateWrCalculation()" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Jumlah Match Kemenangan <span class="text-red-400">*</span></label>
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="adjustWrMatch(-1)" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-lg flex items-center justify-center">-</button>
+                                <input type="number" id="inputWrMatches" value="5" min="3" max="100" oninput="updateWrCalculation()" class="w-20 h-10 rounded-xl bg-black/60 border border-white/20 text-center font-mono font-bold text-white focus:border-cyan-400 outline-none">
+                                <button type="button" onclick="adjustWrMatch(1)" class="w-10 h-10 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-lg flex items-center justify-center">+</button>
+                                <span class="text-xs text-slate-400">Match (Min. 3x)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-VIEW 3: JOKI MABAR / DUO PARTY -->
+                <div id="sectionMabar" class="hidden space-y-4">
+                    <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-200">
+                        👥 <b>Joki Mabar Duo / Gendong Bareng Pro:</b> Anda bermain bersama pro booster kami di dalam room party! <b>100% TIDAK PERLU PASSWORD AKUN</b>. Sangat aman dan bisa sambil belajar rotasi serta gameplay pro player.
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Jumlah Game / Bintang Mabar</label>
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="adjustMabarMatch(-1)" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-lg flex items-center justify-center">-</button>
+                                <input type="number" id="inputMabarMatches" value="3" min="1" max="50" oninput="updateMabarCalculation()" class="w-20 h-10 rounded-xl bg-black/60 border border-white/20 text-center font-mono font-bold text-white focus:border-cyan-400 outline-none">
+                                <button type="button" onclick="adjustMabarMatch(1)" class="w-10 h-10 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-lg flex items-center justify-center">+</button>
+                                <span class="text-xs text-slate-400">Game / Match</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Role Anda Saat Mabar</label>
+                            <input type="text" id="inputMabarRole" placeholder="Contoh: Roamer, Mage, Support, dll." oninput="updateMabarCalculation()" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-VIEW 4: CUSTOM REQUEST BEBAS / QUEST -->
+                <div id="sectionCustom" class="hidden space-y-4">
+                    <div class="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-xs text-purple-200">
+                        📝 <b>Custom Request Bebas:</b> Tuliskan permintaan spesifik Anda (misalnya Clear Spiral Abyss 36 Star, Eksplorasi Region, Rawat Akun Harian, Season Pass Quest, atau request turnamen).
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Judul Request Spesifik <span class="text-red-400">*</span></label>
+                        <input type="text" id="inputCustomTitle" placeholder="Contoh: Clear Spiral Abyss Lantai 9-12 Full Star" oninput="updateCustomCalculation()" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none transition">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Estimasi Biaya / Budget Request (Rp) <span class="text-red-400">*</span></label>
+                            <input type="number" id="inputCustomBudget" value="50000" min="10000" step="5000" oninput="updateCustomCalculation()" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none font-mono">
+                            <span class="text-[10px] text-slate-500 mt-1 block">Biaya standar disesuaikan dengan tingkat kesulitan quest.</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Target Jumlah / Unit</label>
+                            <input type="number" id="inputCustomQty" value="1" min="1" oninput="updateCustomCalculation()" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none font-mono">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- STEP 2: Mode Eksekusi (Akun Dijoki VS Mabar Party) -->
+            <div class="rounded-3xl bg-[#121217] border border-white/10 p-6 sm:p-8 shadow-xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md">
+                        2
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Mode Pengerjaan Joki</h3>
+                        <p class="text-slate-400 text-xs">Pilih apakah akun dikerjakan langsung oleh penjoki atau mabar bareng.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label onclick="setPlayMode('solo')" id="labelModeSolo" class="cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3 bg-cyan-500/10 border-cyan-500/50">
+                        <input type="radio" name="radio_play_mode" value="solo" checked class="mt-1 accent-cyan-500">
+                        <div>
+                            <div class="text-sm font-bold text-white flex items-center gap-1.5">
+                                <span>🎮</span> Joki Akun (Solo Push)
+                            </div>
+                            <div class="text-xs text-slate-400 mt-1">Penjoki login dan menyelesaikan target rank secara cepat. Data dienkripsi 100% aman.</div>
+                        </div>
+                    </label>
+
+                    <label onclick="setPlayMode('party')" id="labelModeParty" class="cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3 bg-white/[0.03] border-white/10 hover:border-white/20">
+                        <input type="radio" name="radio_play_mode" value="party" class="mt-1 accent-cyan-500">
+                        <div>
+                            <div class="text-sm font-bold text-white flex items-center gap-1.5">
+                                <span>👥</span> Mabar Party Duo (Gendong)
+                            </div>
+                            <div class="text-xs text-emerald-400 font-semibold mt-1">✨ Tanpa Berikan Password! Main bareng pro booster di room game.</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- STEP 3: Formulir Data Akun Game & Kontak -->
+            <div class="rounded-3xl bg-[#121217] border border-white/10 p-6 sm:p-8 shadow-xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md">
+                        3
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Data Akun & Catatan Khusus Request</h3>
+                        <p class="text-slate-400 text-xs">Kerahasiaan akun terjamin dan nomor WhatsApp digunakan untuk koordinasi.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Metode Login -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Metode Login Akun <span class="text-red-400">*</span></label>
+                        <select name="login_via" id="selectLoginVia" required class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none transition">
+                            <% if (game.slug === 'mobile-legends') { %>
+                                <option value="Moonton">Akun Moonton (Disarankan - Cepat & Stabil)</option>
+                                <option value="VK">Akun VK</option>
+                                <option value="Google">Google Play Games</option>
+                                <option value="TikTok">TikTok</option>
+                                <option value="Facebook">Facebook</option>
+                            <% } else if (game.slug === 'valorant') { %>
+                                <option value="Riot Games">Riot Games Account (Username & Password)</option>
+                                <option value="Google">Google Account</option>
+                            <% } else if (game.slug === 'genshin-impact') { %>
+                                <option value="HoYoverse">Akun HoYoverse (Email & Password)</option>
+                                <option value="Google">Google Play</option>
+                            <% } else { %>
+                                <option value="Official">Akun Resmi Game</option>
+                                <option value="Google">Google Account</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="VK">VK</option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <!-- Grid: ID/Email & Password -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Email / Username / ID Akun <span class="text-red-400">*</span></label>
+                            <input type="text" name="account_id" id="inputAccountId" required placeholder="Email atau Username Akun" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none transition font-mono">
+                        </div>
+
+                        <div id="wrapperPasswordInput">
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Password Akun <span class="text-red-400">*</span></label>
+                            <div class="relative">
+                                <input type="password" name="account_password" id="inputAccountPassword" required placeholder="Masukkan password akun" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none transition font-mono pr-10">
+                                <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-3 text-slate-400 hover:text-white transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Banner for Party Mode (No password required) -->
+                        <div id="bannerPartyNoPass" class="hidden p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 flex items-center gap-2">
+                            <span>✅</span>
+                            <span><b>Mode Mabar Aktif:</b> Password tidak diperlukan! Pro booster akan meng-invite Anda via room game.</span>
+                        </div>
+                    </div>
+
+                    <!-- Grid: Nickname & WhatsApp -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Nickname In-Game</label>
+                            <input type="text" name="nickname" id="inputNickname" placeholder="Contoh: SkyPlayer99" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Nomor WhatsApp Aktif <span class="text-red-400">*</span></label>
+                            <input type="tel" name="whatsapp" required placeholder="08xxxxxxxxxx (Untuk OTP & Koordinasi)" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none transition font-mono">
+                            <span class="text-[10px] text-slate-500 mt-1 block">Worker akan chat WA saat konfirmasi login OTP atau saat invite room mabar.</span>
+                        </div>
+                    </div>
+
+                    <!-- Request Hero / Role -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Request Hero / Role / Agent Favorit</label>
+                        <input type="text" name="request_hero" id="inputHeroRequest" placeholder="Contoh: Gusion / Ling / Role Jungler (atau Jett / Reyna / Duelist)" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none transition">
+                    </div>
+
+                    <!-- Catatan untuk Penjoki -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Catatan Khusus untuk Pro Booster</label>
+                        <textarea name="notes" id="inputOrderNotes" rows="2" placeholder="Contoh: Main di atas jam 21.00 WIB ya bang, tolong jangan buka pertemanan, dll." class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-sm focus:border-cyan-400 outline-none resize-none transition"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right 1 Col: Summary & Checkout Sticky Card -->
+        <div class="lg:col-span-1 sticky top-28 space-y-6">
+            <div class="rounded-3xl bg-[#121217] border border-white/10 p-6 shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-8 -top-8 w-40 h-40 bg-cyan-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-black text-white">Ringkasan Request Joki</h3>
+                    <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono font-bold uppercase" id="badgeSummaryType">
+                        Push Rank
+                    </span>
+                </div>
+
+                <!-- Summary Details -->
+                <div class="space-y-3 text-xs border-b border-white/10 pb-4 mb-4">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Game</span>
+                        <span class="text-white font-bold"><%= game.name %></span>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <span class="text-slate-400">Detail Request</span>
+                        <span class="text-white font-bold text-right max-w-[180px] leading-tight" id="summaryRequestDetail">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Mode Pengerjaan</span>
+                        <span class="text-cyan-400 font-semibold" id="summaryPlayMode">Joki Akun (Solo)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Total Bintang / Match</span>
+                        <span class="text-white font-bold font-mono" id="summaryQty">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Estimasi Waktu</span>
+                        <span class="text-emerald-400 font-semibold" id="summaryTime">1-24 Jam</span>
+                    </div>
+                </div>
+
+                <!-- Total Amount -->
+                <div class="mb-6">
+                    <div class="text-xs text-slate-400 mb-1">Total Biaya Request</div>
+                    <div class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 font-mono" id="summaryTotalPrice">
+                        Rp 0
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <% if (user) { %>
+                    <button type="submit" id="submitOrderBtn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 text-white font-extrabold text-sm shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:opacity-95 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                        <span>Kirim Request Joki & Bayar</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                <% } else { %>
+                    <a href="/auth/login" class="block text-center w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 text-white font-extrabold text-sm shadow-lg shadow-cyan-500/25 hover:opacity-95 transition">
+                        Login untuk Mengirim Request
+                    </a>
+                <% } %>
+
+                <div class="mt-4 text-center">
+                    <span class="text-[10px] text-slate-500 flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        Transaksi Dilindungi Sandbox Midtrans
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+    // Game Tiers & Pricing Configuration
+    const currentGameSlug = "<%= game.slug %>";
+    let currentMode = "push_rank"; // 'push_rank', 'winrate', 'mabar', 'custom'
+    let playMode = "solo"; // 'solo', 'party'
+
+    const ROMAN = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V' };
+
+    const MLBB_TIERS = [
+        { 
+            id: 'warrior',
+            name: "1. Warrior (I-III) Bintang 1-5", 
+            displayName: "Warrior",
+            divs: 3, 
+            divList: [3, 2, 1],
+            starsPerDiv: 5,
+            minStar: 0,
+            maxStar: 5,
+            pricePerStar: 3000 
+        },
+        { 
+            id: 'elite',
+            name: "2. Elite (I-III) Bintang 1-5", 
+            displayName: "Elite",
+            divs: 3, 
+            divList: [3, 2, 1],
+            starsPerDiv: 5,
+            minStar: 0,
+            maxStar: 5,
+            pricePerStar: 3500 
+        },
+        { 
+            id: 'master',
+            name: "3. Master (I-IV) Bintang 1-5", 
+            displayName: "Master",
+            divs: 4, 
+            divList: [4, 3, 2, 1],
+            starsPerDiv: 5,
+            minStar: 0,
+            maxStar: 5,
+            pricePerStar: 4000 
+        },
+        { 
+            id: 'grandmaster',
+            name: "4. GrandMaster (I-V) Bintang 1-5", 
+            displayName: "GrandMaster",
+            divs: 5, 
+            divList: [5, 4, 3, 2, 1],
+            starsPerDiv: 5,
+            minStar: 0,
+            maxStar: 5,
+            pricePerStar: 5000 
+        },
+        { 
+            id: 'epic',
+            name: "5. Epic (I-V) Bintang 1-5", 
+            displayName: "Epic",
+            divs: 5, 
+            divList: [5, 4, 3, 2, 1],
+            starsPerDiv: 5,
+            minStar: 0,
+            maxStar: 5,
+            pricePerStar: 7500 
+        },
+        { 
+            id: 'legend',
+            name: "6. Legend (I-V) Bintang 1-5", 
+            displayName: "Legend",
+            divs: 5, 
+            divList: [5, 4, 3, 2, 1],
+            starsPerDiv: 5,
+            minStar: 0,
+            maxStar: 5,
+            pricePerStar: 10000 
+        },
+        { 
+            id: 'mythic_grading',
+            name: "7. Mythic Placement/Grading (Penempatan) Bintang 1-10", 
+            displayName: "Mythic Placement (Grading)",
+            divs: 1, 
+            divList: [1],
+            isMythic: true,
+            isGrading: true,
+            starsPerDiv: 10,
+            minStar: 1,
+            maxStar: 10,
+            unitLabel: "Bintang Penempatan (1-10)",
+            pricePerStar: 13000 
+        },
+        { 
+            id: 'mythic',
+            name: "8. Mythic Bintang 1-24", 
+            displayName: "Mythic",
+            divs: 1, 
+            divList: [1],
+            isMythic: true,
+            starsPerDiv: 24,
+            minStar: 1,
+            maxStar: 24,
+            unitLabel: "Bintang Mythic (1-24)",
+            pricePerStar: 16000 
+        },
+        { 
+            id: 'mythic_honor',
+            name: "9. Mythic Honor Bintang 25-49", 
+            displayName: "Mythic Honor",
+            divs: 1, 
+            divList: [1],
+            isMythic: true,
+            starsPerDiv: 25,
+            minStar: 25,
+            maxStar: 49,
+            unitLabel: "Bintang Mythic Honor (25-49)",
+            pricePerStar: 22000 
+        },
+        { 
+            id: 'mythic_glory',
+            name: "10. Mythic Glory Bintang 50-99", 
+            displayName: "Mythic Glory",
+            divs: 1, 
+            divList: [1],
+            isMythic: true,
+            starsPerDiv: 50,
+            minStar: 50,
+            maxStar: 99,
+            unitLabel: "Bintang Mythic Glory (50-99)",
+            pricePerStar: 30000 
+        },
+        { 
+            id: 'mythic_immortal',
+            name: "11. Mythic Immortal Bintang 100+", 
+            displayName: "Mythic Immortal",
+            divs: 1, 
+            divList: [1],
+            isMythic: true,
+            isImmortal: true,
+            starsPerDiv: 900,
+            minStar: 100,
+            maxStar: 999,
+            unitLabel: "Bintang Mythic Immortal (100+)",
+            pricePerStar: 40000 
+        }
+    ];
+
+    const VALORANT_TIERS = [
+        { name: "Iron", divs: 3, pricePerTier: 45000 },
+        { name: "Bronze", divs: 3, pricePerTier: 65000 },
+        { name: "Silver", divs: 3, pricePerTier: 90000 },
+        { name: "Gold", divs: 3, pricePerTier: 135000 },
+        { name: "Platinum", divs: 3, pricePerTier: 190000 },
+        { name: "Diamond", divs: 3, pricePerTier: 260000 },
+        { name: "Ascendant", divs: 3, pricePerTier: 350000 }
+    ];
+
+    const FF_TIERS = [
+        { name: "Silver", divs: 3, pricePerTier: 12000 },
+        { name: "Gold", divs: 4, pricePerTier: 15000 },
+        { name: "Platinum", divs: 4, pricePerTier: 24000 },
+        { name: "Diamond", divs: 4, pricePerTier: 40000 },
+        { name: "Master", divs: 1, pricePerTier: 90000 },
+        { name: "Grandmaster", divs: 1, pricePerTier: 180000 }
+    ];
+
+    const HOK_TIERS = [
+        { name: "Gold", divs: 4, starsPerDiv: 4, pricePerStar: 4500 },
+        { name: "Platinum", divs: 4, starsPerDiv: 4, pricePerStar: 7000 },
+        { name: "Diamond", divs: 5, starsPerDiv: 5, pricePerStar: 11000 },
+        { name: "Master", divs: 5, starsPerDiv: 5, pricePerStar: 17000 },
+        { name: "Grandmaster", divs: 1, starsPerDiv: 25, pricePerStar: 25000 }
+    ];
+
+    function getActiveTiers() {
+        if (currentGameSlug === 'valorant') return VALORANT_TIERS;
+        if (currentGameSlug === 'free-fire') return FF_TIERS;
+        if (currentGameSlug === 'honor-of-kings') return HOK_TIERS;
+        return MLBB_TIERS;
+    }
+
+    // Initialize Dropdowns
+    function initTierDropdowns() {
+        const curTier = document.getElementById('inputCurrentTier');
+        const tarTier = document.getElementById('inputTargetTier');
+        if (!curTier || !tarTier) return;
+
+        let tiers = getActiveTiers();
+
+        curTier.innerHTML = '';
+        tarTier.innerHTML = '';
+
+        tiers.forEach((t, i) => {
+            const opt1 = document.createElement('option');
+            opt1.value = i;
+            opt1.textContent = t.name;
+            curTier.appendChild(opt1);
+
+            const opt2 = document.createElement('option');
+            opt2.value = i;
+            opt2.textContent = t.name;
+            tarTier.appendChild(opt2);
+        });
+
+        // Set default values (e.g. Epic -> Mythic for MLBB)
+        if (currentGameSlug === 'mobile-legends') {
+            curTier.value = 4; // Epic (I-V)
+            tarTier.value = 7; // Mythic Bintang 1-24
+        } else if (tiers.length >= 5) {
+            curTier.value = Math.min(2, tiers.length - 1);
+            tarTier.value = Math.min(4, tiers.length - 1);
+        } else {
+            curTier.value = 0;
+            tarTier.value = Math.min(1, tiers.length - 1);
+        }
+
+        onCurrentTierChange();
+        onTargetTierChange();
+    }
+
+    function onCurrentTierChange() {
+        const cTierIdx = parseInt(document.getElementById('inputCurrentTier').value) || 0;
+        const tiers = getActiveTiers();
+        const tier = tiers[cTierIdx];
+        if (!tier) return;
+
+        const divSelect = document.getElementById('inputCurrentDiv');
+        const divWrapper = document.getElementById('wrapperCurrentDivCol');
+        const starInput = document.getElementById('inputCurrentStar');
+        const starCol = document.getElementById('wrapperCurrentStarCol');
+        const starHint = document.getElementById('hintCurrentStar');
+        const starLabel = document.getElementById('labelCurrentStar');
+
+        divSelect.innerHTML = '';
+        if (tier.divs > 1) {
+            divWrapper.classList.remove('hidden');
+            starCol.className = "col-span-1";
+            const divList = tier.divList || Array.from({length: tier.divs}, (_, i) => tier.divs - i);
+            divList.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d;
+                opt.textContent = `Divisi ${ROMAN[d] || d}`;
+                divSelect.appendChild(opt);
+            });
+            divSelect.value = divList[0]; // Lowest division in this tier
+
+            starLabel.innerText = "Bintang Saat Ini";
+            starInput.min = 0;
+            starInput.max = tier.maxStar || tier.starsPerDiv || 5;
+            starInput.value = 0;
+            starHint.innerText = `Bintang 0-${starInput.max}`;
+        } else {
+            // Single division / Mythic variants
+            divWrapper.classList.add('hidden');
+            starCol.className = "col-span-2";
+            starLabel.innerText = tier.unitLabel || "Jumlah Bintang Saat Ini";
+            starInput.min = tier.minStar !== undefined ? tier.minStar : 0;
+            starInput.max = tier.maxStar !== undefined ? tier.maxStar : 999;
+            starInput.value = tier.minStar !== undefined ? tier.minStar : 1;
+            starHint.innerText = `Batas: ${starInput.min} - ${starInput.max} Bintang`;
+        }
+
+        calculateRankDifference();
+    }
+
+    function onTargetTierChange() {
+        const tTierIdx = parseInt(document.getElementById('inputTargetTier').value) || 0;
+        const tiers = getActiveTiers();
+        const tier = tiers[tTierIdx];
+        if (!tier) return;
+
+        const divSelect = document.getElementById('inputTargetDiv');
+        const divWrapper = document.getElementById('wrapperTargetDivCol');
+        const starInput = document.getElementById('inputTargetStar');
+        const starCol = document.getElementById('wrapperTargetStarCol');
+        const starHint = document.getElementById('hintTargetStar');
+        const starLabel = document.getElementById('labelTargetStar');
+
+        divSelect.innerHTML = '';
+        if (tier.divs > 1) {
+            divWrapper.classList.remove('hidden');
+            starCol.className = "col-span-1";
+            const divList = tier.divList || Array.from({length: tier.divs}, (_, i) => tier.divs - i);
+            divList.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d;
+                opt.textContent = `Divisi ${ROMAN[d] || d}`;
+                divSelect.appendChild(opt);
+            });
+            divSelect.value = divList[divList.length - 1]; // Highest division in target tier
+
+            starLabel.innerText = "Bintang Target";
+            starInput.min = 1;
+            starInput.max = tier.maxStar || tier.starsPerDiv || 5;
+            starInput.value = 1;
+            starHint.innerText = `Bintang 1-${starInput.max}`;
+        } else {
+            // Single division / Mythic variants
+            divWrapper.classList.add('hidden');
+            starCol.className = "col-span-2";
+            starLabel.innerText = tier.unitLabel || "Target Bintang Impian";
+            starInput.min = tier.minStar !== undefined ? tier.minStar : 1;
+            starInput.max = tier.maxStar !== undefined ? tier.maxStar : 999;
+            starInput.value = tier.minStar !== undefined ? tier.minStar : 1;
+            starHint.innerText = `Batas: ${starInput.min} - ${starInput.max} Bintang`;
+        }
+
+        calculateRankDifference();
+    }
+
+    // Helper: Hitung Posisi Bintang Absolut untuk MLBB
+    function getAbsolutePosition(tIdx, div, star, tiers) {
+        const tier = tiers[tIdx];
+        let offset = 0;
+        for (let i = 0; i < tIdx; i++) {
+            offset += (tiers[i].divs * tiers[i].starsPerDiv);
+        }
+
+        let inner = 0;
+        if (tier.divs > 1) {
+            const maxDiv = Math.max(...(tier.divList || [tier.divs]));
+            const divIndex = maxDiv - div;
+            inner = (divIndex * tier.starsPerDiv) + star;
+        } else {
+            if (tier.id === 'mythic_grading') {
+                inner = star;
+            } else if (tier.id === 'mythic') {
+                inner = Math.max(0, star);
+            } else if (tier.id === 'mythic_honor') {
+                inner = Math.max(0, star - 24);
+            } else if (tier.id === 'mythic_glory') {
+                inner = Math.max(0, star - 49);
+            } else if (tier.id === 'mythic_immortal') {
+                inner = Math.max(0, star - 99);
+            } else {
+                inner = star;
+            }
+        }
+        return offset + inner;
+    }
+
+    // Switch Request Types
+    function switchRequestMode(mode) {
+        currentMode = mode;
+        const btnPush = document.getElementById('btnModePushRank');
+        const btnWr = document.getElementById('btnModeWinrate');
+        const btnMabar = document.getElementById('btnModeMabar');
+        const btnCustom = document.getElementById('btnModeCustom');
+
+        const secPush = document.getElementById('sectionPushRank');
+        const secWr = document.getElementById('sectionWinrate');
+        const secMabar = document.getElementById('sectionMabar');
+        const secCustom = document.getElementById('sectionCustom');
+
+        const activeStyle = "req-mode-btn p-3.5 rounded-2xl border text-left transition-all duration-200 bg-cyan-500/15 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]";
+        const inactiveStyle = "req-mode-btn p-3.5 rounded-2xl border text-left transition-all duration-200 bg-white/[0.03] border-white/10 hover:border-cyan-500/30";
+
+        btnPush.className = inactiveStyle;
+        btnWr.className = inactiveStyle;
+        btnMabar.className = inactiveStyle;
+        btnCustom.className = inactiveStyle;
+
+        secPush.classList.add('hidden');
+        secWr.classList.add('hidden');
+        secMabar.classList.add('hidden');
+        secCustom.classList.add('hidden');
+
+        if (mode === 'push_rank') {
+            btnPush.className = activeStyle;
+            secPush.classList.remove('hidden');
+            document.getElementById('hiddenRequestType').value = 'Push Rank';
+            document.getElementById('badgeSummaryType').innerText = 'Push Rank';
+            calculateRankDifference();
+        } else if (mode === 'winrate') {
+            btnWr.className = activeStyle;
+            secWr.classList.remove('hidden');
+            document.getElementById('hiddenRequestType').value = 'GB Winrate';
+            document.getElementById('badgeSummaryType').innerText = 'GB Winrate';
+            updateWrCalculation();
+        } else if (mode === 'mabar') {
+            btnMabar.className = activeStyle;
+            secMabar.classList.remove('hidden');
+            document.getElementById('hiddenRequestType').value = 'Joki Mabar Duo';
+            document.getElementById('badgeSummaryType').innerText = 'Joki Mabar Duo';
+            setPlayMode('party');
+            updateMabarCalculation();
+        } else if (mode === 'custom') {
+            btnCustom.className = activeStyle;
+            secCustom.classList.remove('hidden');
+            document.getElementById('hiddenRequestType').value = 'Custom Request';
+            document.getElementById('badgeSummaryType').innerText = 'Custom Request';
+            updateCustomCalculation();
+        }
+    }
+
+    // Switch Play Mode (Solo vs Party)
+    function setPlayMode(mode) {
+        playMode = mode;
+        document.getElementById('hiddenPlayMode').value = mode;
+
+        const lblSolo = document.getElementById('labelModeSolo');
+        const lblParty = document.getElementById('labelModeParty');
+        const passWrap = document.getElementById('wrapperPasswordInput');
+        const passBanner = document.getElementById('bannerPartyNoPass');
+        const passInput = document.getElementById('inputAccountPassword');
+
+        if (mode === 'solo') {
+            lblSolo.className = "cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3 bg-cyan-500/10 border-cyan-500/50";
+            lblParty.className = "cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3 bg-white/[0.03] border-white/10 hover:border-white/20";
+            document.querySelector('input[name="radio_play_mode"][value="solo"]').checked = true;
+            passWrap.classList.remove('hidden');
+            passBanner.classList.add('hidden');
+            passInput.required = true;
+            document.getElementById('summaryPlayMode').innerText = 'Joki Akun (Solo)';
+        } else {
+            lblParty.className = "cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3 bg-cyan-500/10 border-cyan-500/50";
+            lblSolo.className = "cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3 bg-white/[0.03] border-white/10 hover:border-white/20";
+            document.querySelector('input[name="radio_play_mode"][value="party"]').checked = true;
+            passWrap.classList.add('hidden');
+            passBanner.classList.remove('hidden');
+            passInput.required = false;
+            document.getElementById('summaryPlayMode').innerText = 'Party Mabar Duo (Tanpa Password)';
+        }
+        calculateRankDifference();
+    }
+
+    // Calculate Rank Difference (Rank Awal -> Target)
+    function calculateRankDifference() {
+        if (currentMode !== 'push_rank') return;
+
+        const tiers = getActiveTiers();
+
+        const cTierIdx = parseInt(document.getElementById('inputCurrentTier').value) || 0;
+        const tTierIdx = parseInt(document.getElementById('inputTargetTier').value) || 0;
+
+        const cDiv = parseInt(document.getElementById('inputCurrentDiv').value) || 1;
+        const tDiv = parseInt(document.getElementById('inputTargetDiv').value) || 1;
+
+        const cStar = parseInt(document.getElementById('inputCurrentStar').value) || 0;
+        const tStar = parseInt(document.getElementById('inputTargetStar').value) || 1;
+
+        const currentTierObj = tiers[cTierIdx];
+        const targetTierObj = tiers[tTierIdx];
+
+        let totalCost = 0;
+        let totalUnits = 0;
+
+        if (currentGameSlug === 'mobile-legends') {
+            const posStart = getAbsolutePosition(cTierIdx, cDiv, cStar, tiers);
+            const posEnd = getAbsolutePosition(tTierIdx, tDiv, tStar, tiers);
+            const totalDiff = posEnd - posStart;
+
+            if (totalDiff <= 0) {
+                document.getElementById('calcDiffPreview').innerText = 'Target harus lebih tinggi';
+                document.getElementById('summaryRequestDetail').innerText = 'Target harus lebih tinggi dari rank awal';
+                document.getElementById('summaryTotalPrice').innerText = 'Rp 0';
+                document.getElementById('hiddenTotalAmount').value = '0';
+                return;
+            }
+
+            // Hitung biaya segmen per segmen tingkatan tier
+            for (let i = cTierIdx; i <= tTierIdx; i++) {
+                const tObj = tiers[i];
+                let tierStartPos = 0;
+                for (let j = 0; j < i; j++) tierStartPos += (tiers[j].divs * tiers[j].starsPerDiv);
+                let tierEndPos = tierStartPos + (tObj.divs * tObj.starsPerDiv);
+
+                const overlapStart = Math.max(posStart, tierStartPos);
+                const overlapEnd = Math.min(posEnd, tierEndPos);
+
+                if (overlapEnd > overlapStart) {
+                    const starsInThisTier = overlapEnd - overlapStart;
+                    totalCost += starsInThisTier * (tObj.pricePerStar || 7500);
+                }
+            }
+
+            totalUnits = totalDiff;
+            document.getElementById('calcDiffPreview').innerText = `${totalUnits} Bintang / Star`;
+            document.getElementById('summaryQty').innerText = `${totalUnits} Bintang`;
+        } else if (currentGameSlug === 'valorant' || currentGameSlug === 'free-fire') {
+            if (tTierIdx < cTierIdx || (tTierIdx === cTierIdx && tDiv > cDiv)) {
+                document.getElementById('calcDiffPreview').innerText = 'Target harus lebih tinggi';
+                document.getElementById('summaryRequestDetail').innerText = 'Target belum valid';
+                document.getElementById('summaryTotalPrice').innerText = 'Rp 0';
+                document.getElementById('hiddenTotalAmount').value = '0';
+                return;
+            }
+
+            let currentStep = (cTierIdx * 3) + (3 - cDiv);
+            let targetStep = (tTierIdx * 3) + (3 - tDiv);
+            let tierDiff = Math.max(1, targetStep - currentStep);
+
+            totalUnits = tierDiff;
+            for (let i = cTierIdx; i <= tTierIdx; i++) {
+                totalCost += (tiers[i].pricePerTier || 50000);
+            }
+            if (tierDiff === 1) totalCost = (currentTierObj.pricePerTier || 50000);
+            else totalCost = Math.round(totalCost * (tierDiff / ((tTierIdx - cTierIdx + 1) * 3)));
+
+            totalCost = Math.max(30000, totalCost);
+            document.getElementById('calcDiffPreview').innerText = `${totalUnits} Tier / Divisi`;
+            document.getElementById('summaryQty').innerText = `${totalUnits} Tier`;
+        } else {
+            // HOK
+            if (tTierIdx < cTierIdx || (tTierIdx === cTierIdx && tDiv > cDiv)) {
+                document.getElementById('calcDiffPreview').innerText = 'Target harus lebih tinggi';
+                document.getElementById('summaryRequestDetail').innerText = 'Target belum valid';
+                document.getElementById('summaryTotalPrice').innerText = 'Rp 0';
+                document.getElementById('hiddenTotalAmount').value = '0';
+                return;
+            }
+
+            let starSum = 0;
+            if (cTierIdx === tTierIdx) {
+                let divDiff = (cDiv - tDiv);
+                let stars = (divDiff * (currentTierObj.starsPerDiv || 5)) + (tStar - cStar);
+                starSum = Math.max(1, stars);
+                totalCost = starSum * currentTierObj.pricePerStar;
+            } else {
+                let starsToFinishCurrentTier = (cDiv * (currentTierObj.starsPerDiv || 5)) - cStar;
+                starSum += Math.max(1, starsToFinishCurrentTier);
+                totalCost += starsToFinishCurrentTier * currentTierObj.pricePerStar;
+
+                for (let i = cTierIdx + 1; i < tTierIdx; i++) {
+                    let tierStars = (tiers[i].divs || 5) * (tiers[i].starsPerDiv || 5);
+                    starSum += tierStars;
+                    totalCost += tierStars * tiers[i].pricePerStar;
+                }
+
+                let targetStarsInTier = ((targetTierObj.divs - tDiv) * (targetTierObj.starsPerDiv || 5)) + tStar;
+                starSum += Math.max(1, targetStarsInTier);
+                totalCost += targetStarsInTier * targetTierObj.pricePerStar;
+            }
+
+            totalUnits = starSum;
+            document.getElementById('calcDiffPreview').innerText = `${totalUnits} Bintang / Star`;
+            document.getElementById('summaryQty').innerText = `${totalUnits} Bintang`;
+        }
+
+        // Play mode fee (party duo +25%)
+        if (playMode === 'party') {
+            totalCost = Math.round(totalCost * 1.25);
+        }
+
+        totalCost = Math.max(10000, totalCost);
+
+        // Calculate estimate time
+        let estimateTime = "1-4 Jam";
+        if (totalUnits > 40) estimateTime = "2-5 Hari";
+        else if (totalUnits > 20) estimateTime = "1-2 Hari";
+        else if (totalUnits > 10) estimateTime = "6-12 Jam";
+        else if (totalUnits > 4) estimateTime = "3-6 Jam";
+
+        let currentRankStr = "";
+        let targetRankStr = "";
+
+        if (currentTierObj.divs > 1) {
+            currentRankStr = `${currentTierObj.displayName || currentTierObj.name} ${ROMAN[cDiv] || cDiv} (${cStar}★)`;
+        } else {
+            currentRankStr = `${currentTierObj.displayName || currentTierObj.name} (${cStar}★)`;
+        }
+
+        if (targetTierObj.divs > 1) {
+            targetRankStr = `${targetTierObj.displayName || targetTierObj.name} ${ROMAN[tDiv] || tDiv} (${tStar}★)`;
+        } else {
+            targetRankStr = `${targetTierObj.displayName || targetTierObj.name} (${tStar}★)`;
+        }
+
+        document.getElementById('calcTimePreview').innerText = estimateTime;
+        document.getElementById('summaryTime').innerText = estimateTime;
+        document.getElementById('calcPricePreview').innerText = 'Rp ' + Number(totalCost).toLocaleString('id-ID');
+        document.getElementById('summaryTotalPrice').innerText = 'Rp ' + Number(totalCost).toLocaleString('id-ID');
+        document.getElementById('summaryRequestDetail').innerText = `${currentRankStr} ➔ ${targetRankStr}`;
+
+        // Hidden Form Values
+        document.getElementById('hiddenCurrentRank').value = currentRankStr;
+        document.getElementById('hiddenTargetRank').value = targetRankStr;
+        document.getElementById('hiddenQuantity').value = totalUnits;
+        document.getElementById('hiddenTotalAmount').value = totalCost;
+        document.getElementById('hiddenCustomTitle').value = `Push Rank: ${currentRankStr} ➔ ${targetRankStr}`;
+    }
+
+    // Winrate Calculation
+    function adjustWrMatch(diff) {
+        const inp = document.getElementById('inputWrMatches');
+        let val = Math.max(3, (parseInt(inp.value) || 5) + diff);
+        inp.value = val;
+        updateWrCalculation();
+    }
+
+    function updateWrCalculation() {
+        if (currentMode !== 'winrate') return;
+        const hero = document.getElementById('inputWrHero').value || 'Hero Pilihan';
+        const matches = Math.max(3, parseInt(document.getElementById('inputWrMatches').value) || 5);
+        
+        let pricePerMatch = 6000;
+        if (currentGameSlug === 'valorant') pricePerMatch = 25000;
+        let totalCost = matches * pricePerMatch;
+
+        if (playMode === 'party') totalCost = Math.round(totalCost * 1.25);
+
+        let estimateTime = matches <= 5 ? "1-3 Jam" : matches <= 15 ? "3-8 Jam" : "12-24 Jam";
+
+        document.getElementById('summaryRequestDetail').innerText = `GB WR ${hero} (${matches} Match)`;
+        document.getElementById('summaryQty').innerText = `${matches} Match`;
+        document.getElementById('summaryTime').innerText = estimateTime;
+        document.getElementById('summaryTotalPrice').innerText = 'Rp ' + Number(totalCost).toLocaleString('id-ID');
+
+        document.getElementById('hiddenQuantity').value = matches;
+        document.getElementById('hiddenTotalAmount').value = totalCost;
+        document.getElementById('hiddenCustomTitle').value = `GB Winrate Hero ${hero} (${matches} Match)`;
+        document.getElementById('inputHeroRequest').value = hero;
+    }
+
+    // Mabar Party Calculation
+    function adjustMabarMatch(diff) {
+        const inp = document.getElementById('inputMabarMatches');
+        let val = Math.max(1, (parseInt(inp.value) || 3) + diff);
+        inp.value = val;
+        updateMabarCalculation();
+    }
+
+    function updateMabarCalculation() {
+        if (currentMode !== 'mabar') return;
+        const matches = Math.max(1, parseInt(document.getElementById('inputMabarMatches').value) || 3);
+        const role = document.getElementById('inputMabarRole').value || 'Bebas';
+
+        let pricePerMatch = 8000;
+        if (currentGameSlug === 'valorant') pricePerMatch = 30000;
+        let totalCost = matches * pricePerMatch;
+
+        let estimateTime = matches <= 3 ? "1-2 Jam" : "3-6 Jam";
+
+        document.getElementById('summaryRequestDetail').innerText = `Joki Mabar Duo (${matches} Game)`;
+        document.getElementById('summaryQty').innerText = `${matches} Game`;
+        document.getElementById('summaryTime').innerText = estimateTime;
+        document.getElementById('summaryTotalPrice').innerText = 'Rp ' + Number(totalCost).toLocaleString('id-ID');
+
+        document.getElementById('hiddenQuantity').value = matches;
+        document.getElementById('hiddenTotalAmount').value = totalCost;
+        document.getElementById('hiddenCustomTitle').value = `Joki Mabar Duo Party (${matches} Game)`;
+        if (role) document.getElementById('inputHeroRequest').value = 'Role: ' + role;
+    }
+
+    // Custom Request Calculation
+    function updateCustomCalculation() {
+        if (currentMode !== 'custom') return;
+        const title = document.getElementById('inputCustomTitle').value || 'Custom Quest Request';
+        const budget = Math.max(10000, parseInt(document.getElementById('inputCustomBudget').value) || 50000);
+        const qty = Math.max(1, parseInt(document.getElementById('inputCustomQty').value) || 1);
+        const total = budget * qty;
+
+        document.getElementById('summaryRequestDetail').innerText = title;
+        document.getElementById('summaryQty').innerText = `${qty}x`;
+        document.getElementById('summaryTime').innerText = '1-24 Jam';
+        document.getElementById('summaryTotalPrice').innerText = 'Rp ' + Number(total).toLocaleString('id-ID');
+
+        document.getElementById('hiddenQuantity').value = qty;
+        document.getElementById('hiddenTotalAmount').value = total;
+        document.getElementById('hiddenCustomTitle').value = title;
+    }
+
+    function togglePassVisibility() {
+        const inp = document.getElementById('inputAccountPassword');
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initTierDropdowns();
+    });
+</script>

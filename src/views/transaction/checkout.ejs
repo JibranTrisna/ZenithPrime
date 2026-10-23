@@ -1,0 +1,171 @@
+<div class="max-w-2xl mx-auto py-12 px-4">
+    
+    <div class="text-center mb-8 reveal">
+        <h1 class="text-3xl font-bold text-white mb-2">Selesaikan Pembayaran</h1>
+        <p class="text-slate-400">Order ID: <span class="text-cyan-400 font-mono"><%= transaction.order_id %></span></p>
+    </div>
+
+    <div class="bg-[#18181b] border border-white/10 rounded-3xl overflow-hidden shadow-2xl reveal delay-100 relative">
+        
+        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+        <div class="p-8">
+            <div class="flex items-start gap-4 mb-6 border-b border-white/10 pb-6">
+                <div class="w-20 h-20 rounded-xl overflow-hidden border border-white/10 flex-shrink-0">
+                    <img src="/images/games/<%= transaction.thumbnail %>" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-white"><%= transaction.item_name %></h2>
+                    <p class="text-sm text-slate-400 mb-1"><%= transaction.game_name %></p>
+                    <div class="px-3 py-1 inline-block rounded text-xs font-bold uppercase tracking-wider
+                        <%= (transaction.status || 'pending') === 'pending' ? 'bg-yellow-500/20 text-yellow-500' : 
+                            (transaction.status || 'pending') === 'success' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500' %>">
+                        <%= (transaction.status || 'pending').toUpperCase() %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-sm mb-8">
+                <div class="flex justify-between text-slate-400">
+                    <span>Target ID</span>
+                    <span class="text-white font-mono"><%= transaction.target_id %> <%= transaction.zone_id ? `(${transaction.zone_id})` : '' %></span>
+                </div>
+
+                <% 
+                   // Kalkulasi Harga Asli (Harga Akhir + Diskon)
+                   const discount = Number(transaction.discount_amount) || 0;
+                   const finalAmount = Number(transaction.amount);
+                   const originalPrice = finalAmount + discount;
+                %>
+
+                <div class="flex justify-between text-slate-400">
+                    <span>Harga Item</span>
+                    <span class="text-white">Rp <%= originalPrice.toLocaleString('id-ID') %></span>
+                </div>
+
+                <div class="flex justify-between text-slate-400">
+                    <span>Biaya Layanan</span>
+                    <span class="text-white">Rp 0</span>
+                </div>
+
+                <% if (discount > 0) { %>
+                <div class="flex justify-between text-green-400 font-bold bg-green-500/5 p-2 rounded-lg border border-green-500/10">
+                    <span class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                        Voucher (<%= transaction.promo_code %>)
+                    </span>
+                    <span>- Rp <%= discount.toLocaleString('id-ID') %></span>
+                </div>
+                <% } %>
+
+                <div class="border-t border-dashed border-white/20 pt-4 flex justify-between items-center mt-2">
+                    <span class="text-white font-bold text-lg">Total Bayar</span>
+                    <span class="text-cyan-400 font-bold text-2xl">Rp <%= finalAmount.toLocaleString('id-ID') %></span>
+                </div>
+            </div>
+
+            <% if ((transaction.status || 'pending') === 'pending') { %>
+                <button id="pay-button" class="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg shadow-lg shadow-cyan-500/20 transition transform hover:scale-[1.02]">
+                    Bayar Sekarang
+                </button>
+
+                <!-- Midtrans Sandbox Auto-Sync Button (No Ngrok Needed) -->
+                <button type="button" id="check-status-btn" onclick="syncPayment(false)" class="w-full mt-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition">
+                    <svg id="sync-spinner" class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span id="sync-text">Cek Status Pembayaran (Auto-Sync)</span>
+                </button>
+                <p class="text-[11px] text-slate-500 text-center mt-1.5">
+                    💡 Setelah membayar via QRIS/VA di simulator Midtrans, klik tombol di atas untuk sinkronisasi instan tanpa Ngrok.
+                </p>
+            <% } else if (transaction.status === 'success') { %>
+                <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center text-sm font-bold mb-3 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Pembayaran Terverifikasi Berhasil!</span>
+                </div>
+                <a href="/history" class="block w-full text-center py-4 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold transition">
+                    Lihat Riwayat Transaksi
+                </a>
+            <% } else { %>
+                <button disabled class="w-full py-4 rounded-xl bg-slate-700 text-slate-400 font-bold cursor-not-allowed">
+                    Transaksi Kadaluarsa / Gagal
+                </button>
+            <% } %>
+
+            <div class="mt-4 text-center">
+                <a href="/" class="text-sm text-slate-500 hover:text-white transition">Batal & Kembali ke Beranda</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<%= midtransClientKey %>"></script>
+
+<script type="text/javascript">
+    const payButton = document.getElementById('pay-button');
+    const orderId = '<%= transaction.order_id %>';
+
+    async function syncPayment(redirectAfter = false) {
+        const syncText = document.getElementById('sync-text');
+        const syncSpinner = document.getElementById('sync-spinner');
+        if (syncSpinner) syncSpinner.classList.add('animate-spin');
+        if (syncText) syncText.textContent = 'Menghubungi Midtrans Sandbox...';
+
+        try {
+            const res = await fetch(`/api/transaction/sync/${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                if (syncText) syncText.textContent = '✅ Berhasil Terbayar!';
+                setTimeout(() => {
+                    window.location.href = '/history';
+                }, 800);
+                return;
+            } else if (data.status === 'expired' || data.status === 'failed') {
+                alert('Status Pembayaran: ' + data.status.toUpperCase());
+                window.location.reload();
+                return;
+            } else {
+                if (syncText) syncText.textContent = 'Status: Masih Menunggu Pembayaran';
+                setTimeout(() => {
+                    if (syncText) syncText.textContent = 'Cek Status Pembayaran (Auto-Sync)';
+                }, 2500);
+            }
+        } catch (err) {
+            console.error('Auto-Sync Error:', err);
+            if (syncText) syncText.textContent = 'Gagal sinkronisasi';
+            setTimeout(() => {
+                if (syncText) syncText.textContent = 'Cek Status Pembayaran (Auto-Sync)';
+            }, 2500);
+        } finally {
+            if (syncSpinner) syncSpinner.classList.remove('animate-spin');
+            if (redirectAfter) {
+                window.location.href = '/history';
+            }
+        }
+    }
+    
+    if (payButton) {
+        payButton.addEventListener('click', function () {
+            window.snap.pay('<%= transaction.snap_token %>', {
+                onSuccess: function(result){
+                    // Auto-sync instantly from client without waiting for Ngrok
+                    syncPayment(true);
+                },
+                onPending: function(result){
+                    syncPayment(true);
+                },
+                onError: function(result){
+                    alert("Pembayaran Gagal!");
+                    window.location.reload();
+                },
+                onClose: function(){
+                    // User closed popup, check if already paid outside (e.g. via QRIS/mobile simulator)
+                    syncPayment(false);
+                }
+            });
+        });
+    }
+</script>

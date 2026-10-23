@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title != 'undefined' ? title : 'ZenithPrime' %></title>
+    <link rel="icon" type="image/png" href="/images/ZenithPrimeLogoTransparant.png">
+    <link rel="apple-touch-icon" href="/images/ZenithPrimeLogoTransparant.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Poppins', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        game: { dark: '#050505', card: 'rgba(24, 24, 27, 0.6)', primary: '#6366f1', accent: '#06b6d4' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: #050505; 
+            color: white; 
+            overflow-x: hidden; 
+        }
+        .ambient-light { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; overflow: hidden; }
+        .blob { position: absolute; filter: blur(80px); opacity: 0.4; animation: float 10s infinite ease-in-out; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #6366f1; animation-delay: 0s; }
+        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: #ec4899; animation-delay: 2s; }
+        .blob-3 { top: 40%; left: 40%; width: 300px; height: 300px; background: #06b6d4; opacity: 0.2; animation-delay: 4s; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0b; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+</head>
+<body class="font-sans flex flex-col min-h-screen selection:bg-cyan-500 selection:text-black">
+
+    <div class="ambient-light" aria-hidden="true">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Main Navbar (Role-Adaptive Responsive Header) -->
+    <% 
+        const currentActive = typeof active !== 'undefined' ? active : '';
+        const currentUser = typeof user !== 'undefined' ? user : null;
+        const currentRole = currentUser ? currentUser.role : 'guest';
+    %>
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300 backdrop-blur-xl bg-[#09090b]/85 border-b border-white/[0.08]" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Left: Logo & Brand with Role Badge -->
+                <div class="flex items-center flex-1 justify-start">
+                    <a href="<%= currentRole === 'admin' ? '/admin' : (currentRole === 'staff' ? '/staff' : '/') %>" class="flex items-center group nav-home-link select-none py-1">
+                        <div class="relative flex items-center justify-center">
+                            <div class="absolute inset-0 bg-gradient-to-tr <%= currentRole === 'admin' ? 'from-purple-500/30 via-indigo-500/20 to-pink-500/30' : (currentRole === 'staff' ? 'from-emerald-500/30 via-teal-500/20 to-cyan-500/30' : 'from-cyan-500/30 via-indigo-500/20 to-purple-500/30') %> rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-125 pointer-events-none"></div>
+                            <img src="/images/ZenithPrimeLogoTransparant.png" 
+                                 alt="ZenithPrime Logo" 
+                                 class="w-10 h-10 object-contain relative z-10 transition-all duration-300 ease-out transform group-hover:scale-110 group-hover:-translate-y-0.5 filter drop-shadow-[0_2px_8px_rgba(99,102,241,0.35)] group-hover:drop-shadow-[0_0_16px_rgba(6,182,212,0.7)] will-change-transform">
+                        </div>
+                        <div class="ml-3 flex items-center gap-2">
+                            <span class="text-2xl font-extrabold tracking-tight text-white transition-all duration-300">
+                                Zenith<span class="<%= currentRole === 'admin' ? 'text-indigo-400 group-hover:text-purple-400' : (currentRole === 'staff' ? 'text-emerald-400 group-hover:text-teal-400' : 'text-cyan-400 group-hover:text-indigo-400') %> transition-colors duration-300">Prime</span>
+                            </span>
+                            <% if (currentRole === 'admin') { %>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.3)]">
+                                    Admin Suite
+                                </span>
+                            <% } else if (currentRole === 'staff') { %>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+                                    Staff Portal
+                                </span>
+                            <% } %>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Center: Navigation Pill Capsule (Adapted per Role) -->
+                <div class="hidden md:flex items-center justify-center flex-shrink-0">
+                    <div class="flex items-center space-x-1 bg-white/[0.04] border border-white/[0.08] p-1.5 rounded-full backdrop-blur-md shadow-inner shadow-black/30">
+                        <% if (currentRole === 'admin') { %>
+                            <!-- ADMIN CENTER NAVIGATION -->
+                            <a href="/admin" class="px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'admin_dashboard' || currentActive === 'admin' ? 'text-white bg-gradient-to-r from-indigo-500/30 to-purple-500/30 border border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.3)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>📊</span>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="/admin/transactions" class="px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'admin_transactions' ? 'text-white bg-gradient-to-r from-indigo-500/30 to-purple-500/30 border border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.3)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>💳</span>
+                                <span>Transaksi</span>
+                            </a>
+                            <a href="/admin/games" class="px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'admin_games' ? 'text-white bg-gradient-to-r from-indigo-500/30 to-purple-500/30 border border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.3)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>🎮</span>
+                                <span>Katalog</span>
+                            </a>
+                            <a href="/admin/joki" class="px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'admin_joki' ? 'text-white bg-gradient-to-r from-indigo-500/30 to-purple-500/30 border border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.3)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>⚔️</span>
+                                <span>Kelola Joki</span>
+                            </a>
+                            <a href="/staff" class="px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= ['staff', 'staff_joki', 'chat'].includes(currentActive) ? 'text-white bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.3)]' : 'text-emerald-400/90 hover:text-emerald-300 hover:bg-emerald-500/10' %>">
+                                <span>💼</span>
+                                <span>Staff Portal</span>
+                            </a>
+                            <a href="/" class="px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= ['home', 'games', 'joki', 'history', 'support'].includes(currentActive) ? 'text-white bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border border-cyan-500/40' : 'text-slate-400 hover:text-white hover:bg-white/5' %>">
+                                <span>🌐</span>
+                                <span>Web Toko</span>
+                            </a>
+
+                        <% } else if (currentRole === 'staff') { %>
+                            <!-- STAFF CENTER NAVIGATION (FOKUS MONITORING & PELAYANAN) -->
+                            <a href="/staff" class="px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'staff' || currentActive === 'staff_dashboard' ? 'text-white bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.3)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>⚡</span>
+                                <span>Antrian Top Up</span>
+                            </a>
+                            <a href="/staff/joki" class="px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'staff_joki' ? 'text-white bg-gradient-to-r from-cyan-500/30 to-indigo-500/30 border border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.3)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>⚔️</span>
+                                <span>Workspace Joki</span>
+                            </a>
+                            <a href="/staff/chat" class="px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'chat' || currentActive === 'staff_chat' ? 'text-white bg-gradient-to-r from-indigo-500/30 to-purple-500/30 border border-indigo-500/40 shadow-[0_0_12px_rgba(99,102,241,0.3)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                                <span>Live Chat CS</span>
+                            </a>
+                            <a href="/" class="px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'home' ? 'text-white bg-gradient-to-r from-cyan-500/30 to-indigo-500/30 border border-cyan-500/40' : 'text-slate-400 hover:text-white hover:bg-white/5' %>">
+                                <span>🏠</span>
+                                <span>Lihat Toko</span>
+                            </a>
+
+                        <% } else { %>
+                            <!-- REGULAR USER / CUSTOMER CENTER NAVIGATION -->
+                            <a href="/" class="px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'home' ? 'text-white bg-gradient-to-r from-cyan-500/25 to-indigo-500/25 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.25)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>Beranda</span>
+                            </a>
+                            <a href="/games" class="px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'games' ? 'text-white bg-gradient-to-r from-cyan-500/25 to-indigo-500/25 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.25)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>Katalog Game</span>
+                            </a>
+                            <a href="/joki" class="px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'joki' ? 'text-white bg-gradient-to-r from-cyan-500/25 to-indigo-500/25 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.25)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>Jasa Joki</span>
+                            </a>
+                            <a href="/history" class="px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'history' ? 'text-white bg-gradient-to-r from-cyan-500/25 to-indigo-500/25 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.25)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>Riwayat</span>
+                            </a>
+                            <a href="/contact" class="px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 <%= currentActive === 'support' ? 'text-white bg-gradient-to-r from-cyan-500/25 to-indigo-500/25 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.25)]' : 'text-slate-300 hover:text-white hover:bg-white/5' %>">
+                                <span>Bantuan</span>
+                            </a>
+                            <% if (currentRole === 'user') { %>
+                            <button onclick="toggleChat()" type="button" class="px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 text-cyan-300 hover:text-white hover:bg-cyan-500/20 border border-transparent hover:border-cyan-500/30 cursor-pointer group">
+                                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 group-hover:bg-cyan-300 animate-pulse"></span>
+                                <span>Chat CS</span>
+                            </button>
+                            <% } %>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Right: Role Actions & User Profile -->
+                <div class="hidden md:flex items-center flex-1 justify-end space-x-3">
+                    <% if (currentUser) { %>
+                        <% if (currentRole === 'admin') { %>
+                            <!-- ADMIN RIGHT STATUS & PROFILE -->
+                            <div class="flex items-center gap-2.5">
+                                <span class="hidden xl:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+                                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                                    <span>Superuser</span>
+                                </span>
+
+                                <div class="flex items-center bg-white/[0.04] border border-white/10 rounded-full pl-2 pr-1.5 py-1 backdrop-blur-md hover:border-white/20 transition-all">
+                                    <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-black text-white shadow-sm ring-1 ring-white/20 mr-2 select-none">
+                                        <%= currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'A' %>
+                                    </div>
+                                    <div class="mr-3 text-left hidden lg:block">
+                                        <div class="text-xs font-bold text-white leading-tight max-w-[110px] truncate"><%= currentUser.name %></div>
+                                        <div class="text-[9px] uppercase tracking-wider text-indigo-400 font-mono font-bold">Admin Suite</div>
+                                    </div>
+                                    <a href="/auth/logout" title="Keluar Akun" class="p-1.5 px-2.5 rounded-full bg-red-500/10 hover:bg-red-500/25 border border-red-500/20 text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1 transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                        <span class="hidden xl:inline text-[11px]">Logout</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                        <% } else if (currentRole === 'staff') { %>
+                            <!-- STAFF RIGHT STATUS & PROFILE -->
+                            <div class="flex items-center gap-2.5">
+                                <div class="hidden xl:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>On Duty</span>
+                                </div>
+
+                                <div class="flex items-center bg-white/[0.04] border border-white/10 rounded-full pl-2 pr-1.5 py-1 backdrop-blur-md hover:border-white/20 transition-all">
+                                    <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-xs font-black text-white shadow-sm ring-1 ring-white/20 mr-2 select-none">
+                                        <%= currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'S' %>
+                                    </div>
+                                    <div class="mr-3 text-left hidden lg:block">
+                                        <div class="text-xs font-bold text-white leading-tight max-w-[110px] truncate"><%= currentUser.name %></div>
+                                        <div class="text-[9px] uppercase tracking-wider text-emerald-400 font-mono font-bold">Staff Operator</div>
+                                    </div>
+                                    <a href="/auth/logout" title="Keluar Akun" class="p-1.5 px-2.5 rounded-full bg-red-500/10 hover:bg-red-500/25 border border-red-500/20 text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1 transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                        <span class="hidden xl:inline text-[11px]">Logout</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                        <% } else { %>
+                            <!-- REGULAR USER PROFILE -->
+                            <div class="flex items-center bg-white/[0.04] border border-white/10 rounded-full pl-2 pr-1.5 py-1 backdrop-blur-md hover:border-white/20 transition-all">
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-xs font-black text-white shadow-sm ring-1 ring-white/20 mr-2 select-none">
+                                    <%= currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U' %>
+                                </div>
+                                <div class="mr-3 text-left hidden lg:block">
+                                    <div class="text-xs font-bold text-white leading-tight max-w-[110px] truncate"><%= currentUser.name %></div>
+                                    <div class="text-[9px] uppercase tracking-wider text-cyan-400/90 font-mono font-semibold"><%= currentUser.role || 'Member' %></div>
+                                </div>
+                                <a href="/auth/logout" title="Keluar" class="p-1.5 px-2.5 rounded-full bg-red-500/10 hover:bg-red-500/25 border border-red-500/20 text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1 transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                    <span class="hidden xl:inline text-[11px]">Logout</span>
+                                </a>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <!-- GUEST USER -->
+                        <div class="flex items-center gap-2">
+                            <a href="/auth/login" class="text-slate-300 hover:text-white font-medium text-xs sm:text-sm px-4 py-2 rounded-full hover:bg-white/5 transition-all">
+                                Masuk
+                            </a>
+                            <a href="/auth/register" class="flex items-center gap-1.5 px-5 py-2 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all transform hover:-translate-y-0.5">
+                                <span>Daftar Sekarang</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Mobile Hamburger Button -->
+                <div class="md:hidden flex items-center gap-2">
+                    <button onclick="toggleMobileMenu()" class="p-2 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors" aria-label="Toggle Menu">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Drawer (Role-Adaptive Mobile Dropdown) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-[#09090b]/98 backdrop-blur-2xl border-b border-white/10 shadow-2xl transition-all duration-300">
+            <div class="px-5 pt-3 pb-6 space-y-3 max-w-lg mx-auto">
+                <% if (currentUser) { %>
+                    <!-- User Profile Card in Mobile -->
+                    <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full <%= currentRole === 'admin' ? 'bg-gradient-to-tr from-indigo-500 to-purple-600' : (currentRole === 'staff' ? 'bg-gradient-to-tr from-emerald-500 to-teal-600' : 'bg-gradient-to-tr from-cyan-500 to-indigo-600') %> flex items-center justify-center font-bold text-white shadow-md text-sm ring-1 ring-white/20">
+                                <%= currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U' %>
+                            </div>
+                            <div>
+                                <div class="text-sm font-bold text-white"><%= currentUser.name %></div>
+                                <div class="text-[10px] uppercase tracking-wider <%= currentRole === 'admin' ? 'text-indigo-400' : (currentRole === 'staff' ? 'text-emerald-400' : 'text-cyan-400') %> font-mono font-semibold">
+                                    <%= currentRole === 'admin' ? 'Superuser Admin' : (currentRole === 'staff' ? 'Staff Operator' : 'Member') %>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="/auth/logout" class="px-3 py-1.5 rounded-full bg-red-500/10 hover:bg-red-500/25 border border-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-1 transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                <% } %>
+
+                <!-- Mobile Navigation Links per Role -->
+                <div class="space-y-1 pt-1 border-t border-white/5">
+                    <% if (currentRole === 'admin') { %>
+                        <!-- ADMIN MOBILE LINKS -->
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1.5 font-mono">
+                            Admin Suite Control
+                        </div>
+                        <a href="/admin" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'admin_dashboard' || currentActive === 'admin' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>📊</span> Dashboard Overview
+                        </a>
+                        <a href="/admin/transactions" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'admin_transactions' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>💳</span> Kelola Transaksi
+                        </a>
+                        <a href="/admin/games" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'admin_games' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>🎮</span> Katalog Game & Item
+                        </a>
+                        <a href="/admin/joki" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'admin_joki' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>⚔️</span> Layanan & Order Joki
+                        </a>
+                        <a href="/admin/promos" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                            <span>🎟️</span> Kupon Promo & Voucher
+                        </a>
+                        <a href="/admin/updates" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:bg-white/5 hover:text-white">
+                            <span>📢</span> Berita & Notice
+                        </a>
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 pt-3 pb-1.5 font-mono">
+                            Modul Lain & Toko
+                        </div>
+                        <a href="/staff" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                            <span>💼</span> Workspace Staff
+                        </a>
+                        <a href="/" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-cyan-300 bg-cyan-500/10 border border-cyan-500/20">
+                            <span>🌐</span> Tampilan Web Toko
+                        </a>
+
+                    <% } else if (currentRole === 'staff') { %>
+                        <!-- STAFF MOBILE LINKS -->
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1.5 font-mono">
+                            Staff Operations
+                        </div>
+                        <a href="/staff" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'staff' || currentActive === 'staff_dashboard' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>⚡</span> Antrian Top Up
+                        </a>
+                        <a href="/staff/joki" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'staff_joki' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>⚔️</span> Workspace Joki Game
+                        </a>
+                        <a href="/staff/chat" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'chat' || currentActive === 'staff_chat' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>💬</span> Live CS Chat Desk
+                        </a>
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 pt-3 pb-1.5 font-mono">
+                            Web Toko Publik
+                        </div>
+                        <a href="/" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-cyan-300 bg-cyan-500/10 border border-cyan-500/20">
+                            <span>🏠</span> Halaman Toko / Beranda
+                        </a>
+
+                    <% } else { %>
+                        <!-- REGULAR CUSTOMER MOBILE LINKS -->
+                        <a href="/" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'home' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>🏠</span> Beranda
+                        </a>
+                        <a href="/games" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'games' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>🎮</span> Katalog Game
+                        </a>
+                        <a href="/joki" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'joki' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>🛡️</span> Jasa Joki
+                        </a>
+                        <a href="/history" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'history' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>📜</span> Riwayat Transaksi
+                        </a>
+                        <a href="/contact" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all <%= currentActive === 'support' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' : 'text-slate-300 hover:bg-white/5 hover:text-white' %>">
+                            <span>💬</span> Bantuan & Hubungi Kami
+                        </a>
+                        <% if (currentRole === 'user') { %>
+                        <button onclick="toggleChat(); toggleMobileMenu();" type="button" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500/20 text-left">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                            <span>Live Chat Customer Service</span>
+                        </button>
+                        <% } %>
+                    <% } %>
+                </div>
+
+                <% if (!currentUser) { %>
+                    <div class="pt-3 border-t border-white/10 grid grid-cols-2 gap-3">
+                        <a href="/auth/login" class="text-center py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm hover:bg-white/10 transition">
+                            Masuk
+                        </a>
+                        <a href="/auth/register" class="text-center py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 font-bold text-white text-sm shadow-lg shadow-cyan-500/20 hover:opacity-90 transition">
+                            Daftar Sekarang
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-24 pb-12 relative z-10 px-4 sm:px-6 lg:px-8 container mx-auto">
+        <%- body %>
+    </main>
+
+    <footer class="border-t border-white/10 bg-[#0a0a0b] relative z-10 mt-auto">
+        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                <div class="space-y-4">
+                    <a href="/" class="flex items-center gap-3 group w-fit nav-home-link select-none">
+                        <div class="relative flex items-center justify-center">
+                            <div class="absolute inset-0 bg-cyan-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-125 pointer-events-none"></div>
+                            <img src="/images/ZenithPrimeLogoTransparant.png" 
+                                 alt="ZenithPrime Logo" 
+                                 class="w-10 h-10 object-contain relative z-10 transition-all duration-300 ease-out transform group-hover:scale-110 filter drop-shadow-[0_2px_8px_rgba(99,102,241,0.3)] group-hover:drop-shadow-[0_0_14px_rgba(6,182,212,0.6)] will-change-transform">
+                        </div>
+                        <span class="text-2xl font-extrabold tracking-tight text-white">Zenith<span class="text-cyan-400 group-hover:text-indigo-400 transition-colors duration-300">Prime</span></span>
+                    </a>
+                    <p class="text-slate-400 text-sm leading-relaxed">Platform Top Up Game termurah, tercepat, dan terpercaya. Sistem otomatis 24 jam.</p>
+                    <div class="flex gap-4 pt-2">
+                        <% ['cyan', 'pink', 'green'].forEach(color => { %>
+                            <a href="#" class="social-icon hover:bg-<%= color %>-600 hover:border-<%= color %>-500">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+                            </a>
+                        <% }) %>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="footer-heading decoration-cyan-500">Peta Situs</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="/" class="footer-link"><span class="bullet bg-cyan-500"></span> Beranda</a></li>
+                        <li><a href="/history" class="footer-link"><span class="bullet bg-cyan-500"></span> Cek Pesanan</a></li>
+                        <li><a href="/auth/login" class="footer-link"><span class="bullet bg-cyan-500"></span> Masuk / Daftar</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="footer-heading decoration-pink-500">Dukungan</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="/contact" class="footer-link hover:text-pink-400">Hubungi Kami</a></li>
+                        <li><a href="/terms" class="footer-link hover:text-pink-400">Syarat & Ketentuan</a></li>
+                        <li><a href="/privacy" class="footer-link hover:text-pink-400">Kebijakan Privasi</a></li>
+                        <li><a href="/faq" class="footer-link hover:text-pink-400">F.A.Q</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="footer-heading decoration-purple-500">Pembayaran</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <% [{name: 'BCA', color: 'blue-800'}, {name: 'BNI', color: 'orange-600'}, {name: 'BRI', color: 'blue-600'}, {name: 'DANA', color: 'blue-400'}, {name: 'GOPAY', color: 'green-600'}, {name: 'QRIS', color: 'red-600'}].forEach(p => { %>
+                            <div class="payment-badge"><span class="text-[10px] font-bold text-<%= p.color %>"><%= p.name %></span></div>
+                        <% }) %>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4">Didukung oleh Midtrans Payment Gateway.</p>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-white/5 bg-black/50 backdrop-blur-xl">
+            <div class="max-w-7xl mx-auto py-6 px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-slate-500 text-sm font-mono text-center md:text-left">&copy; <%= new Date().getFullYear() %> ZenithPrime. All Rights Reserved.</p>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">System Online</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- 💬 LIVE CHAT WIDGET (KHUSUS ROLE USER) -->
+    <!-- ========================================== -->
+    <% if (typeof user !== 'undefined' && user && user.role === 'user') { %>
+        <style>
+            @keyframes pulse-red-glow {
+                0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+                70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            }
+            .notify-active {
+                animation: pulse-red-glow 2s infinite !important;
+                border-color: #ef4444 !important;
+            }
+        </style>
+
+        <!-- Floating Chat Trigger Container (Hanya untuk Role User) -->
+        <div id="chatWidgetContainer" style="position: fixed; right: 24px; bottom: 24px; z-index: 9999;" class="flex items-center gap-2.5">
+            <!-- Floating Label Hint (Desktop only) -->
+            <div id="chatHintTooltip" 
+                 onclick="toggleChat()" 
+                 class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#18181b]/95 border border-cyan-500/30 shadow-xl backdrop-blur-md text-xs font-semibold text-slate-200 transition-all duration-300 opacity-90 hover:opacity-100 hover:border-cyan-400 cursor-pointer select-none">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Butuh Bantuan? <strong class="text-cyan-400">Chat CS</strong></span>
+            </div>
+
+            <!-- Floating Action Button -->
+            <button id="chatToggleBtn" 
+                    onclick="toggleChat()"
+                    type="button"
+                    aria-label="Toggle Live Chat Customer Service"
+                    class="w-14 h-14 bg-gradient-to-tr from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-indigo-500 rounded-full shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:shadow-[0_0_35px_rgba(6,182,212,0.7)] flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-white/20 relative group">
+                
+                <span id="userChatBadge" 
+                      style="display: none;"
+                      class="absolute -top-1 -right-1 bg-red-600 text-white text-[11px] font-bold min-w-[22px] h-[22px] flex items-center justify-center rounded-full border-2 border-[#09090b] shadow-md z-50">
+                    0
+                </span>
+                
+                <svg class="w-7 h-7 transition-transform group-hover:scale-110" id="icon-bubble" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <svg class="w-7 h-7 hidden" id="icon-close" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Logged In User Chat Box -->
+        <div id="chatBox" 
+             style="position: fixed; right: 24px; bottom: 90px; z-index: 9999; display: none;"
+             class="w-[360px] max-w-[calc(100vw-32px)] bg-[#18181b]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden origin-bottom-right transition-all duration-300 scale-95 opacity-0">
+            
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-[#18181b] via-[#1f1f2e] to-[#18181b] p-4 border-b border-white/10 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        </div>
+                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-[#18181b] rounded-full"></span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                            CS ZenithPrime
+                            <span class="px-1.5 py-0.5 rounded text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-semibold">Official</span>
+                        </h4>
+                        <p class="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Siaga 24 Jam Nonstop
+                        </p>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition" title="Tutup Chat">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Messages Container -->
+            <div id="messagesList" class="h-[350px] overflow-y-auto p-4 space-y-3 bg-[#09090b]/90 scroll-smooth custom-scrollbar">
+                <div class="text-center text-[11px] text-slate-500 my-2 bg-white/5 py-1.5 rounded-full w-fit mx-auto px-4 border border-white/5">
+                    🔒 Enkripsi Sesi • Riwayat chat aktif 24 jam
+                </div>
+                <div class="flex flex-col items-start gap-1.5 max-w-[92%]">
+                    <div class="flex items-center gap-1.5 text-[10px] text-slate-400 pl-1">
+                        <span class="flex items-center gap-1 text-cyan-300 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>🤖 Zenith AI Assistant</span>
+                    </div>
+                    <div class="bg-[#181824] border border-cyan-500/25 text-slate-100 px-4 py-2.5 rounded-2xl rounded-tl-none text-xs leading-relaxed shadow-lg shadow-cyan-950/20 w-full">
+                        Halo <strong><%= user.name %></strong>! 👋 Saya <strong>Zenith AI</strong>, asisten cerdas 24/7. Ada kendala transaksi atau pertanyaan seputar layanan yang bisa saya bantu?
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 pt-1 pl-1">
+                        <button type="button" onclick="sendQuickReply('Status Pesanan Pending')" class="px-2.5 py-1 rounded-full bg-cyan-500/10 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 hover:text-white text-[10px] font-semibold transition active:scale-95">⏳ Pesanan Pending</button>
+                        <button type="button" onclick="sendQuickReply('Saldo Terpotong Belum Masuk')" class="px-2.5 py-1 rounded-full bg-cyan-500/10 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 hover:text-white text-[10px] font-semibold transition active:scale-95">💳 Saldo Terpotong</button>
+                        <button type="button" onclick="sendQuickReply('Kebijakan Refund')" class="px-2.5 py-1 rounded-full bg-cyan-500/10 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 hover:text-white text-[10px] font-semibold transition active:scale-95">📜 Syarat Refund</button>
+                        <button type="button" onclick="sendQuickReply('#staf')" class="px-2.5 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 hover:text-white text-[10px] font-semibold transition active:scale-95">👨‍💼 Bicara ke Staf</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Form -->
+            <form id="chatForm" class="p-3 bg-[#18181b] border-t border-white/10 flex gap-2">
+                <input type="text" id="chatInput" autocomplete="off" placeholder="Tanya AI atau ketik nomor order..." class="flex-1 bg-black/60 text-white text-xs sm:text-sm rounded-xl px-4 py-2.5 border border-white/10 focus:border-cyan-500 outline-none transition placeholder-slate-500">
+                <button type="submit" class="bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white px-3.5 py-2.5 rounded-xl transition shadow-lg shadow-cyan-600/20 active:scale-95 flex items-center justify-center">
+                    <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                </button>
+            </form>
+        </div>
+
+        <audio id="notifSound" src="https://cdn.freesound.org/previews/536/536108_11679093-lq.mp3" preload="auto"></audio>
+
+        <script>
+            const socket = io();
+            const userId = '<%= user.id %>';
+            const roomId = 'user_' + userId;
+            
+            const chatToggleBtn = document.getElementById('chatToggleBtn');
+            const chatBox = document.getElementById('chatBox');
+            const chatForm = document.getElementById('chatForm');
+            const chatInput = document.getElementById('chatInput');
+            const messagesList = document.getElementById('messagesList');
+            const badge = document.getElementById('userChatBadge');
+            const notifSound = document.getElementById('notifSound');
+            const iconBubble = document.getElementById('icon-bubble');
+            const iconClose = document.getElementById('icon-close');
+            
+            let unreadCount = 0;
+            let historyLoaded = false;
+
+            function formatMarkdown(text) {
+                if (!text) return '';
+                // 1. Escape HTML untuk mencegah XSS
+                let escaped = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+                
+                // 2. Format Bold: **teks**
+                escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
+                
+                // 3. Format Inline Code: `code`
+                escaped = escaped.replace(/`([^`]+)`/g, '<code class="bg-black/60 text-cyan-300 px-1.5 py-0.5 rounded text-[11px] font-mono border border-cyan-500/20">$1</code>');
+                
+                // 4. Format Markdown Link: [teks](url)
+                escaped = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-cyan-400 underline hover:text-cyan-300 font-semibold">$1</a>');
+                
+                // 5. Line break
+                escaped = escaped.replace(/\n/g, '<br>');
+                return escaped;
+            }
+
+            function sendQuickReply(replyText) {
+                if (chatInput && chatForm) {
+                    chatInput.value = replyText;
+                    chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
+                }
+            }
+
+            function appendMessageBubble(message, isStaff, isAi, quickReplies) {
+                const div = document.createElement('div');
+                div.className = isStaff ? "flex flex-col items-start gap-1.5 max-w-[92%]" : "flex justify-end";
+
+                if (isStaff) {
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = "flex items-center gap-1.5 text-[10px] text-slate-400 pl-1";
+                    if (isAi) {
+                        headerDiv.innerHTML = `<span class="flex items-center gap-1 text-cyan-300 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>🤖 Zenith AI Assistant</span>`;
+                    } else {
+                        headerDiv.innerHTML = `<span class="flex items-center gap-1 text-emerald-300 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>👨‍💼 CS Staff Zenith</span>`;
+                    }
+                    div.appendChild(headerDiv);
+
+                    const bubble = document.createElement('div');
+                    bubble.className = isAi 
+                        ? "bg-[#181824] border border-cyan-500/25 text-slate-100 px-4 py-2.5 rounded-2xl rounded-tl-none text-xs leading-relaxed shadow-lg shadow-cyan-950/20 w-full"
+                        : "bg-white/10 border border-white/5 text-slate-100 px-4 py-2.5 rounded-2xl rounded-tl-none text-xs leading-relaxed max-w-[85%]";
+                    bubble.innerHTML = formatMarkdown(message);
+                    div.appendChild(bubble);
+
+                    if (Array.isArray(quickReplies) && quickReplies.length > 0) {
+                        const chipsContainer = document.createElement('div');
+                        chipsContainer.className = "flex flex-wrap gap-1.5 pt-1 pl-1";
+                        quickReplies.forEach(qr => {
+                            const chip = document.createElement('button');
+                            chip.type = "button";
+                            chip.className = "px-2.5 py-1 rounded-full bg-cyan-500/10 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 hover:text-white text-[10px] font-semibold transition active:scale-95";
+                            chip.textContent = qr;
+                            chip.onclick = () => sendQuickReply(qr);
+                            chipsContainer.appendChild(chip);
+                        });
+                        div.appendChild(chipsContainer);
+                    }
+                } else {
+                    const bubble = document.createElement('div');
+                    bubble.className = "bg-gradient-to-r from-cyan-600 to-indigo-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-none text-xs leading-relaxed max-w-[82%] shadow-md shadow-cyan-900/20";
+                    bubble.textContent = message; // Raw text (anti-XSS)
+                    div.appendChild(bubble);
+                }
+                
+                messagesList.appendChild(div);
+            }
+
+            async function loadChatHistory() {
+                if (historyLoaded) return;
+                try {
+                    const res = await fetch('/api/chat-history');
+                    const data = await res.json();
+                    if (data.success && Array.isArray(data.chats)) {
+                        data.chats.forEach(item => {
+                            appendMessageBubble(item.message, item.is_staff_reply === 1, item.is_ai === 1, null);
+                        });
+                        historyLoaded = true;
+                        messagesList.scrollTop = messagesList.scrollHeight;
+                    }
+                } catch (e) {
+                    console.log("Could not load history:", e);
+                }
+            }
+
+            function toggleChat() {
+                if (!chatBox) return;
+                if (chatBox.style.display === 'none' || !chatBox.style.display) {
+                    chatBox.style.display = 'block';
+                    setTimeout(() => { 
+                        chatBox.classList.remove('scale-95', 'opacity-0'); 
+                    }, 10);
+                    
+                    unreadCount = 0;
+                    if (badge) {
+                        badge.innerText = '0';
+                        badge.style.display = 'none';
+                    }
+                    if (chatToggleBtn) chatToggleBtn.classList.remove('notify-active');
+                    
+                    if (iconBubble) iconBubble.classList.add('hidden');
+                    if (iconClose) iconClose.classList.remove('hidden');
+
+                    loadChatHistory();
+                    setTimeout(() => {
+                        messagesList.scrollTop = messagesList.scrollHeight;
+                        if (chatInput) chatInput.focus();
+                    }, 100);
+                } else {
+                    chatBox.classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => { chatBox.style.display = 'none'; }, 250);
+                    if (iconBubble) iconBubble.classList.remove('hidden');
+                    if (iconClose) iconClose.classList.add('hidden');
+                }
+            }
+
+            socket.emit('join_chat', userId);
+
+            if (chatForm) {
+                chatForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const msg = chatInput.value.trim();
+                    if (msg) {
+                        const data = { sender_id: userId, room_id: roomId, message: msg, is_staff: false };
+                        socket.emit('send_message', data);
+                        chatInput.value = '';
+                    }
+                });
+            }
+
+            socket.on('receive_message', (data) => {
+                appendMessageBubble(data.message, data.is_staff, data.is_ai, data.quick_replies);
+                messagesList.scrollTop = messagesList.scrollHeight;
+
+                if (data.is_staff) {
+                    if (chatBox.style.display === 'none') {
+                        if (notifSound) {
+                            notifSound.currentTime = 0;
+                            notifSound.play().catch(e => console.log('Autoplay blocked'));
+                        }
+                        unreadCount++;
+                        if (badge) {
+                            badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
+                            badge.style.display = 'flex';
+                        }
+                        if (chatToggleBtn) chatToggleBtn.classList.add('notify-active');
+                    }
+                }
+            });
+        </script>
+    <% } %>
+
+    <style type="text/tailwindcss">
+        .badge-role { @apply text-xs font-bold tracking-wider border px-3 py-1.5 rounded-lg transition-all; }
+        .btn-logout { @apply px-5 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-400 transition-all text-sm font-semibold backdrop-blur-sm; }
+        .btn-primary { @apply px-6 py-2.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-bold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-0.5; }
+        .mobile-link { @apply block px-3 py-3 rounded-lg hover:bg-white/10 text-white font-medium; }
+        .mobile-role-link { @apply block px-3 py-3 rounded-lg font-bold mb-2 border; }
+        .social-icon { @apply w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all; }
+        .footer-heading { @apply text-white font-bold text-lg mb-6 relative inline-block after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-1/2 after:h-1 after:rounded-full; }
+        .footer-heading.decoration-cyan-500::after { @apply bg-cyan-500; }
+        .footer-heading.decoration-pink-500::after { @apply bg-pink-500; }
+        .footer-heading.decoration-purple-500::after { @apply bg-purple-500; }
+        .footer-link { @apply text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-2; }
+        .bullet { @apply w-1.5 h-1.5 rounded-full; }
+        .payment-badge { @apply bg-white px-2 py-1 rounded shadow h-8 flex items-center justify-center; }
+    </style>
+
+    <script>
+        function toggleMobileMenu() { 
+            const menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden'); 
+        }
+
+        // Close mobile menu on outside click
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('mobile-menu');
+            const hamburger = e.target.closest('button[onclick*="toggleMobileMenu"]');
+            if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && !hamburger) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
+                const handleScroll = () => {
+                    if (window.scrollY > 20) {
+                        navbar.classList.add('bg-[#09090b]/95', 'shadow-2xl', 'shadow-black/70', 'border-white/[0.12]');
+                        navbar.classList.remove('bg-[#09090b]/80');
+                    } else {
+                        navbar.classList.remove('bg-[#09090b]/95', 'shadow-2xl', 'shadow-black/70', 'border-white/[0.12]');
+                        navbar.classList.add('bg-[#09090b]/80');
+                    }
+                };
+                window.addEventListener('scroll', handleScroll, { passive: true });
+                handleScroll();
+            }
+
+            document.querySelectorAll('.nav-home-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (window.location.pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

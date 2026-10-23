@@ -1,0 +1,516 @@
+<div class="space-y-8">
+
+    <!-- Top Header Banner -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-[#0e0e13] via-[#14141c] to-[#0e0e13] border border-white/10 shadow-2xl relative overflow-hidden">
+        <div class="absolute -top-24 -left-24 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    Joki Management Desk
+                </span>
+                <span class="text-xs text-slate-500">•</span>
+                <span class="text-xs text-slate-400 font-mono">Mobile Legends & Multi-Game</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                Kelola Layanan & Transaksi Joki
+            </h1>
+            <p class="text-slate-400 text-xs md:text-sm mt-1">Konfigurasi paket harga joki rank, pantau antrian worker staff, dan riwayat pesanan.</p>
+        </div>
+
+        <div class="flex items-center gap-3 relative z-10">
+            <button onclick="openCreateServiceModal()" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 text-white font-bold text-xs shadow-lg shadow-amber-500/20 flex items-center gap-2 transition">
+                <span>+</span> Tambah Layanan Joki
+            </button>
+        </div>
+    </div>
+
+    <!-- Flash Notifications -->
+    <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+        <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-2.5">
+            <span>✅</span> <span><%= success_msg %></span>
+        </div>
+    <% } %>
+    <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+        <div class="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-2.5">
+            <span>⚠️</span> <span><%= error_msg %></span>
+        </div>
+    <% } %>
+
+    <!-- 4 Quick Stats Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-5 rounded-2xl bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 hover:border-cyan-500/40 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Gross Omset Joki</span>
+                <span class="p-1 rounded-lg bg-cyan-500/10 text-cyan-400 text-xs">💰</span>
+            </div>
+            <div class="text-2xl font-black text-cyan-400 font-mono">
+                Rp <%= Number(stats.total_revenue || 0).toLocaleString('id-ID') %>
+            </div>
+            <div class="text-[10px] text-slate-500 mt-1">Akumulasi pembayaran joki sukses</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 hover:border-indigo-500/40 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Total Order Joki</span>
+                <span class="p-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs">📋</span>
+            </div>
+            <div class="text-2xl font-black text-white font-mono">
+                <%= stats.total_orders || 0 %>
+            </div>
+            <div class="text-[10px] text-slate-500 mt-1">Total pesanan joki masuk sistem</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-[#0e0e13]/80 backdrop-blur-xl border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.06)] hover:border-amber-500/50 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] text-amber-400 font-bold uppercase tracking-wider">Antrian & Proses</span>
+                <span class="p-1 rounded-lg bg-amber-500/10 text-amber-400 text-xs animate-pulse">⚡</span>
+            </div>
+            <div class="text-2xl font-black text-amber-400 font-mono">
+                <%= Number(stats.queued_count || 0) + Number(stats.in_progress_count || 0) %>
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1"><%= stats.queued_count || 0 %> Menunggu • <%= stats.in_progress_count || 0 %> Sedang Dikerjakan</div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 hover:border-emerald-500/40 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Layanan Aktif</span>
+                <span class="p-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs">🎮</span>
+            </div>
+            <div class="text-2xl font-black text-emerald-400 font-mono">
+                <%= stats.total_services || 0 %>
+            </div>
+            <div class="text-[10px] text-slate-500 mt-1">Paket joki aktif di <%= games.length %> game</div>
+        </div>
+    </div>
+
+    <!-- Tab Switching Navigation & Search Toolbar -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+        <div class="flex items-center gap-2">
+            <button onclick="switchAdminTab('services')" id="tabBtnServices" class="px-5 py-2.5 rounded-2xl text-xs font-bold transition bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20">
+                📦 Daftar Layanan & Tarif (<%= services.length %>)
+            </button>
+            <button onclick="switchAdminTab('orders')" id="tabBtnOrders" class="px-5 py-2.5 rounded-2xl text-xs font-bold transition bg-[#0e0e13] text-slate-400 hover:text-white border border-white/10">
+                📜 Semua Transaksi Joki (<%= orders.length %>)
+            </button>
+        </div>
+
+        <div class="relative w-full md:w-72">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500 text-xs">🔍</span>
+            <input type="text" id="jokiLiveSearch" onkeyup="filterJokiTable()" placeholder="Cari game, rank, nama, order ID..." class="w-full pl-9 pr-3 py-2 rounded-2xl bg-black/60 border border-white/10 text-white text-xs outline-none focus:border-cyan-500 transition">
+        </div>
+    </div>
+
+    <!-- TAB 1: KELOLA LAYANAN & HARGA -->
+    <div id="contentAdminServices" class="bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-white/5 text-slate-400 uppercase font-bold text-[11px] border-b border-white/5">
+                    <tr>
+                        <th class="px-6 py-4">Game</th>
+                        <th class="px-6 py-4">Kategori & Nama Paket</th>
+                        <th class="px-6 py-4">Harga Jual</th>
+                        <th class="px-6 py-4">Modal (Worker Fee)</th>
+                        <th class="px-6 py-4">Margin Profit</th>
+                        <th class="px-6 py-4">Estimasi</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5" id="servicesTableBody">
+                    <% services.forEach(srv => { 
+                        const profit = srv.price - (srv.base_price || 0);
+                        const marginPct = (srv.base_price > 0) ? Math.round((profit / srv.base_price) * 100) : 0;
+                    %>
+                        <tr class="hover:bg-white/[0.03] transition service-row" data-search="<%= (srv.game_name + ' ' + srv.game_slug + ' ' + srv.category + ' ' + srv.name).toLowerCase() %>">
+                            <td class="px-6 py-4 font-bold text-white">
+                                <span class="px-2.5 py-1 rounded-xl bg-white/5 border border-white/10 text-slate-200">
+                                    <%= srv.game_name || srv.game_slug %>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-[10px] font-mono block w-fit mb-1"><%= srv.category %></span>
+                                <div class="text-white font-bold text-sm"><%= srv.name %></div>
+                                <div class="text-[10px] text-slate-500">Min Order: <%= srv.min_order %>x</div>
+                            </td>
+                            <td class="px-6 py-4 font-mono font-bold text-cyan-400 text-sm">
+                                Rp <%= Number(srv.price).toLocaleString('id-ID') %>
+                            </td>
+                            <td class="px-6 py-4 font-mono text-slate-400">
+                                Rp <%= Number(srv.base_price || 0).toLocaleString('id-ID') %>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-mono text-xs font-bold text-emerald-400">+Rp <%= Number(profit).toLocaleString('id-ID') %></div>
+                                <span class="text-[9px] font-mono text-emerald-300/80"><%= marginPct %>% margin</span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-300">
+                                <span class="px-2 py-0.5 rounded-lg bg-white/5 text-[11px] text-slate-400">⏱️ <%= srv.estimate_time %></span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <% if (srv.is_active) { %>
+                                    <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">🟢 Aktif</span>
+                                <% } else { %>
+                                    <span class="px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold">🔴 Non-aktif</span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button onclick='openEditServiceModal(<%= JSON.stringify(srv) %>)' class="p-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 transition" title="Edit Layanan">
+                                        ✏️
+                                    </button>
+                                    <form action="/admin/joki/services/delete/<%= srv.id %>" method="POST" onsubmit="return confirm('Hapus layanan joki <%= srv.name %>?')">
+                                        <button type="submit" class="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition" title="Hapus Layanan">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 2: SEMUA TRANSAKSI JOKI -->
+    <div id="contentAdminOrders" class="hidden bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-white/5 text-slate-400 uppercase font-bold text-[11px] border-b border-white/5">
+                    <tr>
+                        <th class="px-6 py-4">Order ID & Waktu</th>
+                        <th class="px-6 py-4">Layanan & Game</th>
+                        <th class="px-6 py-4">Pelanggan & Kontak</th>
+                        <th class="px-6 py-4">Worker Ditugaskan</th>
+                        <th class="px-6 py-4">Total Biaya</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-center">Aksi / Tracker</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5" id="ordersTableBody">
+                    <% orders.forEach(order => { %>
+                        <tr class="hover:bg-white/[0.03] transition order-row" data-search="<%= (order.order_id + ' ' + order.service_name + ' ' + order.game_name + ' ' + order.customer_name + ' ' + order.whatsapp).toLowerCase() %>">
+                            <td class="px-6 py-4 font-mono">
+                                <div class="text-white font-bold flex items-center gap-1.5">
+                                    <span>#<%= order.order_id %></span>
+                                    <button onclick="copyToClipboard('<%= order.order_id %>', 'Order ID')" class="text-slate-500 hover:text-cyan-400 text-xs">📋</button>
+                                </div>
+                                <div class="text-[10px] text-slate-500"><%= new Date(order.created_at).toLocaleString('id-ID') %></div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-white font-bold"><%= order.service_name %></div>
+                                <div class="text-slate-400 text-[11px]"><%= order.game_name %> • <%= order.quantity %>x Target</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-white font-medium flex items-center gap-1.5">
+                                    <span class="w-5 h-5 rounded-full bg-white/10 text-slate-300 text-[10px] flex items-center justify-center font-bold">
+                                        <%= (order.customer_name || 'U').charAt(0).toUpperCase() %>
+                                    </span>
+                                    <span><%= order.customer_name %></span>
+                                </div>
+                                <div class="text-slate-400 text-[10px] font-mono mt-0.5">WA: <%= order.whatsapp %></div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <% if (order.worker_name) { %>
+                                    <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold">
+                                        👤 <%= order.worker_name %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-semibold">
+                                        ⏳ Menunggu Worker
+                                    </span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 font-mono font-bold text-cyan-400 text-sm">
+                                Rp <%= Number(order.total_amount).toLocaleString('id-ID') %>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase
+                                        <%= order.payment_status === 'success' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30' %>">
+                                        <%= order.payment_status %>
+                                    </span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase
+                                        <%= order.order_status === 'completed' ? 'bg-emerald-500/20 text-emerald-400' : 
+                                            order.order_status === 'in_progress' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-slate-500/20 text-slate-400' %>">
+                                        <%= order.order_status %>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <a href="/joki/status/<%= order.order_id %>" target="_blank" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-cyan-300 text-[11px] font-semibold border border-white/10 transition">
+                                        Tracker ↗
+                                    </a>
+                                    <% if (order.proof_image) { %>
+                                        <a href="/images/joki-proofs/<%= order.proof_image %>" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition" title="Lihat Bukti Selesai">
+                                            📷 Bukti
+                                        </a>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Create Service -->
+<div id="createServiceModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div class="bg-[#0e0e13] w-full max-w-lg rounded-3xl border border-white/10 p-6 shadow-2xl relative">
+        <button onclick="closeCreateServiceModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">✕</button>
+        <div class="pb-4 mb-4 border-b border-white/10">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <span class="text-amber-400">+</span> Tambah Layanan Joki Baru
+            </h3>
+            <p class="text-slate-400 text-xs">Tambahkan paket rank, per-bintang, atau winrate baru</p>
+        </div>
+
+        <form action="/admin/joki/services/create" method="POST" class="space-y-4 text-xs">
+            <div>
+                <label class="block font-bold text-slate-300 mb-1">Game</label>
+                <select name="game_slug" required class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+                    <% games.forEach(g => { %>
+                        <option value="<%= g.slug %>"><%= g.name %></option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-300 mb-1">Kategori Layanan</label>
+                <input type="text" name="category" required placeholder="Contoh: Joki Per Bintang / Paket Rank Hemat" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-300 mb-1">Nama Layanan</label>
+                <input type="text" name="name" required placeholder="Contoh: Grandmaster ke Epic (Per Bintang)" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Harga Jual (Rp)</label>
+                    <input type="number" name="price" id="create_joki_price" required placeholder="5000" oninput="calcCreateJokiMargin()" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-cyan-400 font-mono font-bold outline-none focus:border-amber-500 transition">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Fee Worker / Modal (Rp)</label>
+                    <input type="number" name="base_price" id="create_joki_base" placeholder="3000" oninput="calcCreateJokiMargin()" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono outline-none focus:border-amber-500 transition">
+                </div>
+            </div>
+
+            <!-- Live Net Profit Preview -->
+            <div id="createJokiMarginPreview" class="p-3 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between text-slate-400">
+                <span>Profit Admin / Order:</span>
+                <span id="createJokiProfitText" class="font-mono font-bold text-slate-300">Rp 0</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Minimal Order (Qty)</label>
+                    <input type="number" name="min_order" value="1" min="1" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Estimasi Waktu</label>
+                    <input type="text" name="estimate_time" value="1-24 Jam" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-300 mb-1">Deskripsi Singkat</label>
+                <textarea name="description" rows="2" placeholder="Deskripsi layanan untuk pelanggan..." class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition"></textarea>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeCreateServiceModal()" class="flex-1 bg-white/5 hover:bg-white/10 py-3 rounded-2xl text-slate-300 font-bold transition">Batal</button>
+                <button type="submit" class="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 py-3 rounded-2xl text-white font-bold shadow-lg shadow-amber-500/20 transition">Simpan Layanan Baru</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit Service -->
+<div id="editServiceModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div class="bg-[#0e0e13] w-full max-w-lg rounded-3xl border border-white/10 p-6 shadow-2xl relative">
+        <button onclick="closeEditServiceModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">✕</button>
+        <div class="pb-4 mb-4 border-b border-white/10">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <span class="text-indigo-400">✏️</span> Edit Layanan Joki
+            </h3>
+            <p class="text-slate-400 text-xs">Perbarui tarif, fee worker, atau deskripsi</p>
+        </div>
+
+        <form action="/admin/joki/services/update" method="POST" class="space-y-4 text-xs">
+            <input type="hidden" name="id" id="editServiceId">
+
+            <div>
+                <label class="block font-bold text-slate-300 mb-1">Game</label>
+                <select name="game_slug" id="editGameSlug" required class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+                    <% games.forEach(g => { %>
+                        <option value="<%= g.slug %>"><%= g.name %></option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-300 mb-1">Kategori Layanan</label>
+                <input type="text" name="category" id="editCategory" required class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-300 mb-1">Nama Layanan</label>
+                <input type="text" name="name" id="editName" required class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Harga Jual (Rp)</label>
+                    <input type="number" name="price" id="editPrice" required oninput="calcEditJokiMargin()" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-cyan-400 font-mono font-bold outline-none focus:border-amber-500 transition">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Fee Worker / Modal (Rp)</label>
+                    <input type="number" name="base_price" id="editBasePrice" oninput="calcEditJokiMargin()" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono outline-none focus:border-amber-500 transition">
+                </div>
+            </div>
+
+            <!-- Live Net Profit Preview -->
+            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between text-slate-400">
+                <span>Profit Admin / Order:</span>
+                <span id="editJokiProfitText" class="font-mono font-bold text-slate-300">Rp 0</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Min Order</label>
+                    <input type="number" name="min_order" id="editMinOrder" min="1" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Estimasi Waktu</label>
+                    <input type="text" name="estimate_time" id="editEstimateTime" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Status</label>
+                    <select name="is_active" id="editIsActive" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition">
+                        <option value="1">🟢 Aktif</option>
+                        <option value="0">🔴 Non-aktif</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-slate-300 mb-1">Deskripsi Singkat</label>
+                <textarea name="description" id="editDescription" rows="2" class="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white outline-none focus:border-amber-500 transition"></textarea>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeEditServiceModal()" class="flex-1 bg-white/5 hover:bg-white/10 py-3 rounded-2xl text-slate-300 font-bold transition">Batal</button>
+                <button type="submit" class="flex-1 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:opacity-90 py-3 rounded-2xl text-white font-bold shadow-lg shadow-cyan-500/20 transition">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Copy Feedback Toast Notification -->
+<div id="copyToast" class="fixed bottom-6 right-6 z-50 bg-[#18181b] border border-cyan-500/40 text-cyan-400 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 text-xs font-semibold">
+    <span>📋</span>
+    <span id="copyToastText">Berhasil disalin ke clipboard!</span>
+</div>
+
+<script>
+    function copyToClipboard(text, label) {
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById('copyToast');
+            const toastText = document.getElementById('copyToastText');
+            toastText.textContent = `${label || 'ID'} "${text}" disalin!`;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 2500);
+        });
+    }
+
+    function switchAdminTab(tab) {
+        const btnServices = document.getElementById('tabBtnServices');
+        const btnOrders = document.getElementById('tabBtnOrders');
+        const contentServices = document.getElementById('contentAdminServices');
+        const contentOrders = document.getElementById('contentAdminOrders');
+
+        if (tab === 'services') {
+            btnServices.className = "px-5 py-2.5 rounded-2xl text-xs font-bold transition bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20";
+            btnOrders.className = "px-5 py-2.5 rounded-2xl text-xs font-bold transition bg-[#0e0e13] text-slate-400 hover:text-white border border-white/10";
+            contentServices.classList.remove('hidden');
+            contentOrders.classList.add('hidden');
+        } else {
+            btnOrders.className = "px-5 py-2.5 rounded-2xl text-xs font-bold transition bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20";
+            btnServices.className = "px-5 py-2.5 rounded-2xl text-xs font-bold transition bg-[#0e0e13] text-slate-400 hover:text-white border border-white/10";
+            contentOrders.classList.remove('hidden');
+            contentServices.classList.add('hidden');
+        }
+    }
+
+    function filterJokiTable() {
+        const query = document.getElementById('jokiLiveSearch').value.toLowerCase();
+        
+        // Filter services
+        document.querySelectorAll('.service-row').forEach(row => {
+            const str = row.getAttribute('data-search') || '';
+            row.style.display = str.includes(query) ? '' : 'none';
+        });
+
+        // Filter orders
+        document.querySelectorAll('.order-row').forEach(row => {
+            const str = row.getAttribute('data-search') || '';
+            row.style.display = str.includes(query) ? '' : 'none';
+        });
+    }
+
+    function calcCreateJokiMargin() {
+        const price = Number(document.getElementById('create_joki_price').value) || 0;
+        const base = Number(document.getElementById('create_joki_base').value) || 0;
+        const profit = price - base;
+        const textEl = document.getElementById('createJokiProfitText');
+        if (profit >= 0) {
+            textEl.className = 'font-mono font-bold text-emerald-400';
+            textEl.innerText = `+Rp ${profit.toLocaleString('id-ID')}`;
+        } else {
+            textEl.className = 'font-mono font-bold text-red-400';
+            textEl.innerText = `-Rp ${Math.abs(profit).toLocaleString('id-ID')}`;
+        }
+    }
+
+    function calcEditJokiMargin() {
+        const price = Number(document.getElementById('editPrice').value) || 0;
+        const base = Number(document.getElementById('editBasePrice').value) || 0;
+        const profit = price - base;
+        const textEl = document.getElementById('editJokiProfitText');
+        if (profit >= 0) {
+            textEl.className = 'font-mono font-bold text-emerald-400';
+            textEl.innerText = `+Rp ${profit.toLocaleString('id-ID')}`;
+        } else {
+            textEl.className = 'font-mono font-bold text-red-400';
+            textEl.innerText = `-Rp ${Math.abs(profit).toLocaleString('id-ID')}`;
+        }
+    }
+
+    const createModal = document.getElementById('createServiceModal');
+    function openCreateServiceModal() { createModal.classList.remove('hidden'); }
+    function closeCreateServiceModal() { createModal.classList.add('hidden'); }
+
+    const editModal = document.getElementById('editServiceModal');
+    function openEditServiceModal(srv) {
+        document.getElementById('editServiceId').value = srv.id;
+        document.getElementById('editGameSlug').value = srv.game_slug;
+        document.getElementById('editCategory').value = srv.category;
+        document.getElementById('editName').value = srv.name;
+        document.getElementById('editPrice').value = srv.price;
+        document.getElementById('editBasePrice').value = srv.base_price;
+        document.getElementById('editMinOrder').value = srv.min_order || 1;
+        document.getElementById('editEstimateTime').value = srv.estimate_time || '1-24 Jam';
+        document.getElementById('editIsActive').value = srv.is_active ? "1" : "0";
+        document.getElementById('editDescription').value = srv.description || '';
+        calcEditJokiMargin();
+        editModal.classList.remove('hidden');
+    }
+    function closeEditServiceModal() { editModal.classList.add('hidden'); }
+</script>

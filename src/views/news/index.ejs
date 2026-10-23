@@ -1,0 +1,68 @@
+<div class="max-w-7xl mx-auto py-12 px-4">
+    
+    <div class="text-center mb-16 reveal">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">
+            Berita & <span class="text-purple-500">Update</span>
+        </h1>
+        <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+            Informasi terbaru seputar jadwal maintenance, event, promo, dan update game.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <% if (updates.length > 0) { %>
+            <% updates.forEach((item, index) => { 
+                // Logic Warna Badge
+                let badgeColor = 'bg-slate-500';
+                if(item.type === 'MAINTENANCE') badgeColor = 'bg-red-500';
+                if(item.type === 'EVENT') badgeColor = 'bg-green-500';
+                if(item.type === 'UPDATE') badgeColor = 'bg-blue-500';
+                if(item.type === 'PROMO') badgeColor = 'bg-yellow-500 text-black';
+            %>
+                <a href="/news/<%= item.slug %>" 
+                   class="group flex flex-col bg-[#18181b] border border-white/10 rounded-3xl overflow-hidden hover:-translate-y-2 transition-all duration-300 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/10 reveal"
+                   style="animation-delay: <%= index * 100 %>ms">
+                    
+                    <div class="h-48 bg-gradient-to-br from-[#1e1e24] to-[#2d2d35] relative overflow-hidden group-hover:brightness-110 transition">
+                        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-purple-500/30 transition"></div>
+                        
+                        <div class="absolute top-4 left-4">
+                            <span class="<%= badgeColor %> text-[10px] font-bold px-3 py-1.5 rounded-lg text-white tracking-wider shadow-lg">
+                                <%= item.type %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="p-8 flex flex-col flex-grow">
+                        <div class="flex items-center gap-2 mb-3 text-slate-500 text-xs font-mono">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <%= item.formatted_date %>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-white mb-3 line-clamp-2 group-hover:text-purple-400 transition-colors">
+                            <%= item.title %>
+                        </h3>
+
+                        <div class="text-slate-400 text-sm line-clamp-3 mb-6 flex-grow leading-relaxed">
+                            <%- item.content.replace(/<[^>]*>?/gm, '') %>
+                        </div>
+
+                        <div class="flex items-center text-purple-400 text-sm font-bold mt-auto group/btn w-fit">
+                            Baca Selengkapnya
+                            <svg class="w-4 h-4 ml-2 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                    </div>
+                </a>
+            <% }) %>
+        <% } else { %>
+            <div class="col-span-full py-20 text-center">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-800 mb-4">
+                    <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Belum ada berita</h3>
+                <p class="text-slate-500">Update terbaru akan muncul di sini.</p>
+            </div>
+        <% } %>
+    </div>
+
+</div>

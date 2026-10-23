@@ -1,0 +1,188 @@
+<div class="max-w-2xl mx-auto py-12 px-4">
+    
+    <div class="text-center mb-8 reveal">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>🛡️</span> Pembayaran Jasa Joki
+        </div>
+        <h1 class="text-3xl font-extrabold text-white mb-2">Selesaikan Pembayaran Joki</h1>
+        <p class="text-slate-400 text-sm">Order ID: <span class="text-cyan-400 font-mono font-bold"><%= order.order_id %></span></p>
+    </div>
+
+    <div class="bg-[#18181b] border border-white/10 rounded-3xl overflow-hidden shadow-2xl reveal delay-100 relative">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+        <div class="p-8">
+            <!-- Header Summary -->
+            <div class="flex items-start gap-4 mb-6 border-b border-white/10 pb-6">
+                <div class="w-20 h-20 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0 bg-black/40 p-1">
+                    <img src="/images/games/<%= order.game_thumbnail %>" class="w-full h-full object-cover rounded-xl" onerror="this.src='/images/ZenithPrimeLogoTransparant.png'">
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-white"><%= order.service_name %></h2>
+                    <p class="text-xs text-slate-400 mb-2"><%= order.game_name %> • <%= order.quantity %>x Bintang/Tier</p>
+                    <div class="px-3 py-1 inline-block rounded-full text-xs font-bold uppercase tracking-wider
+                        <%= order.payment_status === 'pending' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : 
+                            order.payment_status === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30' %>">
+                        Status Bayar: <%= order.payment_status.toUpperCase() %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Pesanan -->
+            <div class="space-y-3 text-xs sm:text-sm mb-8">
+                <div class="flex justify-between text-slate-400">
+                    <span>Tipe Request</span>
+                    <span class="text-cyan-400 font-bold uppercase"><%= order.request_type || 'Push Rank' %></span>
+                </div>
+                <% if (order.current_rank && order.target_rank) { %>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Jarak Target</span>
+                        <span class="text-white font-bold"><%= order.current_rank %> ➔ <%= order.target_rank %></span>
+                    </div>
+                <% } %>
+                <div class="flex justify-between text-slate-400">
+                    <span>Mode Pengerjaan</span>
+                    <span class="<%= order.play_mode === 'party' ? 'text-emerald-400' : 'text-cyan-300' %> font-semibold">
+                        <%= order.play_mode === 'party' ? '👥 Mabar Party Duo (Tanpa Password)' : '🎮 Joki Akun (Solo Push)' %>
+                    </span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                    <span>Metode Login</span>
+                    <span class="text-white font-semibold uppercase text-cyan-400"><%= order.login_via %></span>
+                </div>
+                <% if (order.play_mode !== 'party') { %>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Akun / Email</span>
+                        <span class="text-white font-mono"><%= order.account_id %></span>
+                    </div>
+                <% } %>
+                <% if (order.nickname) { %>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Nickname In-Game</span>
+                        <span class="text-white"><%= order.nickname %></span>
+                    </div>
+                <% } %>
+                <div class="flex justify-between text-slate-400">
+                    <span>WhatsApp Koordinasi</span>
+                    <span class="text-white font-mono"><%= order.whatsapp %></span>
+                </div>
+                <% if (order.request_hero) { %>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Request Hero / Agent</span>
+                        <span class="text-amber-400 font-semibold"><%= order.request_hero %></span>
+                    </div>
+                <% } %>
+                <div class="flex justify-between text-slate-400">
+                    <span>Estimasi Pengerjaan</span>
+                    <span class="text-emerald-400 font-semibold"><%= order.estimate_time || '1-24 Jam' %></span>
+                </div>
+
+                <div class="border-t border-dashed border-white/20 pt-4 flex justify-between items-center mt-3">
+                    <span class="text-white font-bold text-base sm:text-lg">Total Tagihan Joki</span>
+                    <span class="text-cyan-400 font-bold text-2xl font-mono">Rp <%= Number(order.total_amount).toLocaleString('id-ID') %></span>
+                </div>
+            </div>
+
+            <% if (order.payment_status === 'pending') { %>
+                <button id="pay-button" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold text-base shadow-lg shadow-cyan-500/25 transition transform hover:scale-[1.01]">
+                    Bayar Sekarang (Midtrans Snap)
+                </button>
+
+                <!-- Outbound Auto-Sync Button (No Ngrok Needed) -->
+                <button type="button" id="check-status-btn" onclick="syncPayment(false)" class="w-full mt-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-300 hover:text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition">
+                    <svg id="sync-spinner" class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span id="sync-text">Cek Status Pembayaran (Auto-Sync)</span>
+                </button>
+                <p class="text-[11px] text-slate-500 text-center mt-2 leading-relaxed">
+                    💡 Setelah melakukan pembayaran pada simulator Midtrans Sandbox (QRIS, VA BCA/Mandiri/dll), klik tombol di atas untuk sinkronisasi otomatis status order tanpa perlu membuka Ngrok.
+                </p>
+            <% } else if (order.payment_status === 'success') { %>
+                <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center text-sm font-bold mb-3 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Pembayaran Joki Berhasil Diverifikasi!</span>
+                </div>
+                <a href="/joki/status/<%= order.order_id %>" class="block w-full text-center py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white font-bold transition">
+                    Pantau Live Progress Joki
+                </a>
+            <% } else { %>
+                <button disabled class="w-full py-4 rounded-xl bg-slate-700 text-slate-400 font-bold cursor-not-allowed">
+                    Transaksi Kadaluarsa / Dibatalkan
+                </button>
+            <% } %>
+
+            <div class="mt-6 text-center">
+                <a href="/joki" class="text-xs text-slate-500 hover:text-white transition">Kembali ke Katalog Joki</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<%= clientKey %>"></script>
+
+<script type="text/javascript">
+    const payButton = document.getElementById('pay-button');
+    const orderId = '<%= order.order_id %>';
+
+    async function syncPayment(redirectAfter = false) {
+        const syncText = document.getElementById('sync-text');
+        const syncSpinner = document.getElementById('sync-spinner');
+        if (syncSpinner) syncSpinner.classList.add('animate-spin');
+        if (syncText) syncText.textContent = 'Menghubungi Midtrans Sandbox...';
+
+        try {
+            const res = await fetch(`/joki/sync/${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            
+            if (data.status === 'success' || data.payment_status === 'success') {
+                if (syncText) syncText.textContent = '✅ Berhasil Terbayar!';
+                setTimeout(() => {
+                    window.location.href = `/joki/status/${orderId}`;
+                }, 800);
+                return;
+            } else if (data.status === 'expired' || data.status === 'failed') {
+                alert('Status Pembayaran: ' + data.status.toUpperCase());
+                window.location.reload();
+                return;
+            } else {
+                if (syncText) syncText.textContent = 'Status: Masih Menunggu Pembayaran';
+                setTimeout(() => {
+                    if (syncText) syncText.textContent = 'Cek Status Pembayaran (Auto-Sync)';
+                }, 2500);
+            }
+        } catch (err) {
+            console.error('Auto-Sync Error:', err);
+            if (syncText) syncText.textContent = 'Gagal sinkronisasi';
+            setTimeout(() => {
+                if (syncText) syncText.textContent = 'Cek Status Pembayaran (Auto-Sync)';
+            }, 2500);
+        } finally {
+            if (syncSpinner) syncSpinner.classList.remove('animate-spin');
+            if (redirectAfter) {
+                window.location.href = `/joki/status/${orderId}`;
+            }
+        }
+    }
+    
+    if (payButton) {
+        payButton.addEventListener('click', function () {
+            window.snap.pay('<%= order.snap_token %>', {
+                onSuccess: function(result){
+                    syncPayment(true);
+                },
+                onPending: function(result){
+                    syncPayment(true);
+                },
+                onError: function(result){
+                    alert("Pembayaran Gagal!");
+                    window.location.reload();
+                },
+                onClose: function(){
+                    syncPayment(false);
+                }
+            });
+        });
+    }
+</script>

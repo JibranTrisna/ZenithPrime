@@ -1,0 +1,440 @@
+<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6">
+
+    <!-- Unified Staff Header -->
+    <%- include('../partials/staff_header') %>
+
+    <!-- Quick Stats Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div class="p-5 rounded-2xl bg-[#18181b] border border-white/10 flex items-center justify-between">
+            <div>
+                <div class="text-xs text-slate-400 font-bold uppercase">Antrian Masuk</div>
+                <div class="text-2xl font-black text-yellow-400 mt-1 font-mono"><%= queuedOrders.length %></div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Siap diambil untuk dikerjakan</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-yellow-500/10 text-yellow-400 flex items-center justify-center text-xl">
+                ⏳
+            </div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-[#18181b] border border-white/10 flex items-center justify-between">
+            <div>
+                <div class="text-xs text-slate-400 font-bold uppercase">Tugas Aktif Saya</div>
+                <div class="text-2xl font-black text-cyan-400 mt-1 font-mono"><%= activeOrders.length %></div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Sedang dalam proses joki</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xl">
+                🎮
+            </div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-[#18181b] border border-white/10 flex items-center justify-between">
+            <div>
+                <div class="text-xs text-slate-400 font-bold uppercase">Telah Diselesaikan</div>
+                <div class="text-2xl font-black text-emerald-400 mt-1 font-mono"><%= completedOrders.length %></div>
+                <div class="text-[10px] text-slate-500 mt-0.5">Order joki sukses & proof upload</div>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">
+                🏆
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Selector & Search -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-white/10 pb-4">
+        <div class="flex items-center gap-2 overflow-x-auto">
+            <button onclick="switchStaffTab('active')" id="tabBtnActive" class="px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20 shrink-0">
+                <span>🎮</span>
+                <span>Tugas Aktif Saya</span>
+                <span class="px-2 py-0.5 rounded-full bg-black/30 text-[10px]"><%= activeOrders.length %></span>
+            </button>
+
+            <button onclick="switchStaffTab('queue')" id="tabBtnQueue" class="px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-[#18181b] border border-white/10 text-slate-400 hover:text-white shrink-0">
+                <span>📥</span>
+                <span>Antrian Order Baru</span>
+                <span class="px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 text-[10px]"><%= queuedOrders.length %></span>
+            </button>
+
+            <button onclick="switchStaffTab('completed')" id="tabBtnCompleted" class="px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-[#18181b] border border-white/10 text-slate-400 hover:text-white shrink-0">
+                <span>🏆</span>
+                <span>Riwayat Selesai</span>
+                <span class="px-2 py-0.5 rounded-full bg-white/5 text-[10px]"><%= completedOrders.length %></span>
+            </button>
+        </div>
+
+        <div class="relative w-full sm:w-64">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500 text-xs">🔍</span>
+            <input type="text" id="staffJokiSearch" onkeyup="filterStaffJoki()" placeholder="Cari order, akun, hero..." class="w-full pl-8 pr-3 py-2 rounded-xl bg-black/50 border border-white/10 text-white text-xs outline-none focus:border-cyan-400">
+        </div>
+    </div>
+
+    <!-- TAB 1: TUGAS AKTIF SAYA (IN-PROGRESS) -->
+    <div id="contentActive" class="space-y-6">
+        <% if (activeOrders.length === 0) { %>
+            <div class="rounded-3xl bg-[#18181b] border border-white/10 p-12 text-center text-slate-400">
+                <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4 text-2xl">
+                    ☕
+                </div>
+                <h3 class="text-lg font-bold text-white mb-1">Tidak Ada Tugas Joki Aktif</h3>
+                <p class="text-xs text-slate-500 max-w-md mx-auto mb-4">Kamu sedang tidak memiliki tugas joki yang berjalan. Silakan cek tab <b>Antrian Order Baru</b> untuk mengambil tugas.</p>
+                <button onclick="switchStaffTab('queue')" class="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition">
+                    Lihat Antrian Masuk
+                </button>
+            </div>
+        <% } else { %>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="activeOrdersGrid">
+                <% activeOrders.forEach(order => { %>
+                    <div class="joki-active-card rounded-3xl bg-[#18181b] border border-cyan-500/30 p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between" data-search="<%= (order.order_id + ' ' + order.service_name + ' ' + order.game_name + ' ' + (order.nickname || '') + ' ' + (order.request_hero || '') + ' ' + (order.account_id || '') + ' ' + (order.customer_name || '')).toLowerCase() %>">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                        <div>
+                            <!-- Header -->
+                            <div class="flex items-start justify-between gap-4 mb-4 border-b border-white/10 pb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-black/40 p-1">
+                                        <img src="/images/games/<%= order.game_thumbnail %>" class="w-full h-full object-cover rounded-lg" onerror="this.src='/images/ZenithPrimeLogoTransparant.png'">
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[10px] font-mono text-cyan-400 font-bold block">#<%= order.order_id %></span>
+                                            <button onclick="copyToClipboard('<%= order.order_id %>', 'Order ID')" class="text-slate-500 hover:text-cyan-400 text-xs transition" title="Salin Order ID">📋</button>
+                                            <span class="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 text-[10px] font-bold uppercase"><%= order.request_type || 'Push Rank' %></span>
+                                        </div>
+                                        <h4 class="text-base font-bold text-white leading-tight mt-1"><%= order.service_name %></h4>
+                                        <span class="text-xs text-slate-400"><%= order.game_name %> • <%= order.quantity %>x Target</span>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-[10px] font-bold uppercase tracking-wider animate-pulse">
+                                    Dikerjakan
+                                </span>
+                            </div>
+
+                            <!-- Request & Account Credentials (Worker Eyes Only) -->
+                            <div class="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-2 mb-4 text-xs font-mono">
+                                <div class="flex justify-between items-center text-slate-400">
+                                    <span>Mode Joki:</span>
+                                    <span class="<%= order.play_mode === 'party' ? 'text-emerald-400' : 'text-cyan-300' %> font-bold">
+                                        <%= order.play_mode === 'party' ? '👥 Mabar Party Duo (Tanpa Password)' : '🎮 Joki Akun (Solo Push)' %>
+                                    </span>
+                                </div>
+                                <% if (order.current_rank && order.target_rank) { %>
+                                    <div class="flex justify-between items-center text-slate-400">
+                                        <span>Target Request:</span>
+                                        <span class="text-white font-bold"><%= order.current_rank %> ➔ <%= order.target_rank %></span>
+                                    </div>
+                                <% } %>
+                                <div class="flex justify-between items-center text-slate-400">
+                                    <span>Metode Login:</span>
+                                    <span class="text-cyan-400 font-bold uppercase"><%= order.login_via %></span>
+                                </div>
+                                <% if (order.play_mode !== 'party') { %>
+                                    <div class="flex justify-between items-center text-slate-400">
+                                        <span>ID / Akun:</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="text-white select-all font-bold"><%= order.account_id %></span>
+                                            <button onclick="copyToClipboard('<%= order.account_id %>', 'ID Akun')" class="text-slate-500 hover:text-cyan-400 text-xs transition" title="Salin ID Akun">📋</button>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center text-slate-400">
+                                        <span>Password:</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="text-yellow-400 select-all font-bold"><%= order.account_password %></span>
+                                            <button onclick="copyToClipboard('<%= order.account_password %>', 'Password')" class="text-slate-500 hover:text-yellow-400 text-xs transition" title="Salin Password">📋</button>
+                                        </div>
+                                    </div>
+                                <% } %>
+                                <% if (order.nickname) { %>
+                                    <div class="flex justify-between items-center text-slate-400">
+                                        <span>Nickname:</span>
+                                        <span class="text-slate-200"><%= order.nickname %></span>
+                                    </div>
+                                <% } %>
+                                <% if (order.request_hero) { %>
+                                    <div class="flex justify-between items-center text-slate-400">
+                                        <span>Req Hero/Role:</span>
+                                        <span class="text-amber-400 font-semibold"><%= order.request_hero %></span>
+                                    </div>
+                                <% } %>
+                            </div>
+
+                            <% if (order.notes) { %>
+                                <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-300 mb-4">
+                                    <b class="text-slate-400">Catatan Pelanggan:</b> <%= order.notes %>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <!-- Footer Actions: WhatsApp Customer & Complete Modal Trigger -->
+                        <div class="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+                            <% 
+                                // Format WA link
+                                let cleanWa = order.whatsapp.replace(/\D/g, '');
+                                if (cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.substring(1);
+                                const waMsg = encodeURIComponent(`Halo ${order.customer_name}, saya pro booster ZenithPrime yang mengerjakan order #${order.order_id} (${order.game_name} - ${order.service_name}). Saya siap login, mohon bantuannya jika ada kode OTP ya!`);
+                            %>
+                            <a href="https://wa.me/<%= cleanWa %>?textQueue=<%= waMsg %>" target="_blank" class="px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 text-xs font-bold flex items-center gap-1.5 transition">
+                                <span>📱</span>
+                                <span>Chat WA Pelanggan</span>
+                            </a>
+
+                            <button onclick="openCompleteModal('<%= order.order_id %>', '<%= order.service_name %>')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 transition flex items-center gap-1.5">
+                                <span>✓</span>
+                                <span>Selesaikan & Upload Bukti</span>
+                            </button>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- TAB 2: ANTRIAN ORDER BARU (QUEUED) -->
+    <div id="contentQueue" class="hidden space-y-4">
+        <% if (queuedOrders.length === 0) { %>
+            <div class="rounded-3xl bg-[#18181b] border border-white/10 p-12 text-center text-slate-400">
+                <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4 text-2xl">
+                    🎉
+                </div>
+                <h3 class="text-lg font-bold text-white mb-1">Semua Antrian Bersih!</h3>
+                <p class="text-xs text-slate-500 max-w-md mx-auto">Saat ini belum ada pesanan joki baru yang menunggu worker. Kerja bagus tim!</p>
+            </div>
+        <% } else { %>
+            <div class="rounded-3xl bg-[#18181b] border border-white/10 overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-400">
+                        <thead class="bg-white/5 text-white uppercase font-bold text-xs border-b border-white/10">
+                            <tr>
+                                <th class="px-6 py-4">Layanan & Game</th>
+                                <th class="px-6 py-4">Pelanggan & Target</th>
+                                <th class="px-6 py-4">Estimasi Waktu</th>
+                                <th class="px-6 py-4 text-center">Biaya Joki</th>
+                                <th class="px-6 py-4 text-center">Aksi Ambil</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5 text-xs">
+                            <% queuedOrders.forEach(order => { %>
+                                <tr class="hover:bg-white/5 transition group joki-queue-row" data-search="<%= (order.order_id + ' ' + order.service_name + ' ' + order.game_name + ' ' + order.customer_name + ' ' + order.whatsapp).toLowerCase() %>">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-black/40 p-1">
+                                                <img src="/images/games/<%= order.game_thumbnail %>" class="w-full h-full object-cover rounded-lg" onerror="this.src='/images/ZenithPrimeLogoTransparant.png'">
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center gap-1.5">
+                                                    <span class="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 text-[10px] font-bold uppercase"><%= order.request_type || 'Push Rank' %></span>
+                                                    <span class="text-[10px] text-slate-500 font-mono">#<%= order.order_id %></span>
+                                                    <button onclick="copyToClipboard('<%= order.order_id %>', 'Order ID')" class="text-slate-500 hover:text-cyan-400 text-xs transition" title="Salin Order ID">📋</button>
+                                                </div>
+                                                <div class="text-white font-bold group-hover:text-cyan-400 transition mt-0.5"><%= order.service_name %></div>
+                                                <div class="text-[11px] text-slate-500"><%= order.game_name %> • <%= order.play_mode === 'party' ? '👥 Mabar Party Duo' : '🎮 Joki Akun' %></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-white font-medium"><%= order.customer_name %></div>
+                                        <% if (order.current_rank && order.target_rank) { %>
+                                            <div class="text-cyan-400 font-bold text-[11px]"><%= order.current_rank %> ➔ <%= order.target_rank %></div>
+                                        <% } else { %>
+                                            <div class="text-slate-400 font-mono text-[11px]">Jumlah: <b class="text-cyan-400"><%= order.quantity %>x</b></div>
+                                        <% } %>
+                                        <div class="text-[10px] text-slate-500 mt-0.5">Via: <span class="uppercase text-amber-400"><%= order.login_via %></span> | WA: <span class="font-mono text-white"><%= order.whatsapp %></span></div>
+                                    </td>
+                                    <td class="px-6 py-4 text-emerald-400 font-medium">
+                                        ⏱️ <%= order.estimate_time || '1-24 Jam' %>
+                                    </td>
+                                    <td class="px-6 py-4 text-center font-bold font-mono text-white">
+                                        Rp <%= Number(order.total_amount).toLocaleString('id-ID') %>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <form action="/staff/joki/claim" method="POST" onsubmit="return confirm('Apakah kamu yakin ingin mengambil tugas joki ini?')">
+                                            <input type="hidden" name="order_id" value="<%= order.order_id %>">
+                                            <button type="submit" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-xs shadow-md transition transform hover:scale-105">
+                                                Ambil Order (Claim)
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- TAB 3: RIWAYAT SELESAI SAYA -->
+    <div id="contentCompleted" class="hidden space-y-4">
+        <% if (completedOrders.length === 0) { %>
+            <div class="rounded-3xl bg-[#18181b] border border-white/10 p-12 text-center text-slate-400">
+                <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4 text-2xl">
+                    📁
+                </div>
+                <h3 class="text-lg font-bold text-white mb-1">Belum Ada Riwayat Selesai</h3>
+                <p class="text-xs text-slate-500">Daftar pesanan joki yang telah kamu selesaikan akan tercatat di sini.</p>
+            </div>
+        <% } else { %>
+            <div class="rounded-3xl bg-[#18181b] border border-white/10 overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-400">
+                        <thead class="bg-white/5 text-white uppercase font-bold text-xs border-b border-white/10">
+                            <tr>
+                                <th class="px-6 py-4">Layanan & Game</th>
+                                <th class="px-6 py-4">Pelanggan</th>
+                                <th class="px-6 py-4">Total Biaya</th>
+                                <th class="px-6 py-4 text-center">Bukti Screenshot</th>
+                                <th class="px-6 py-4 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5 text-xs">
+                            <% completedOrders.forEach(order => { %>
+                                <tr class="hover:bg-white/5 transition">
+                                    <td class="px-6 py-4">
+                                        <div class="text-white font-bold"><%= order.service_name %></div>
+                                        <div class="text-[11px] text-slate-500 font-mono"><%= order.game_name %> • <%= order.order_id %></div>
+                                    </td>
+                                    <td class="px-6 py-4 text-white">
+                                        <%= order.customer_name %>
+                                    </td>
+                                    <td class="px-6 py-4 text-cyan-400 font-mono font-bold">
+                                        Rp <%= Number(order.total_amount).toLocaleString('id-ID') %>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <% if (order.proof_image) { %>
+                                            <a href="/images/joki-proofs/<%= order.proof_image %>" target="_blank" class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold hover:bg-emerald-500/20 transition">
+                                                <span>📷 Lihat Bukti</span>
+                                            </a>
+                                        <% } else { %>
+                                            <span class="text-slate-600">-</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="inline-block px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">
+                                            Selesai
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+</div>
+
+<!-- Complete Order Modal with Proof Screenshot Upload -->
+<div id="completeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-[#18181b] w-full max-w-lg rounded-3xl border border-white/10 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+        <button onclick="closeCompleteModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">✕</button>
+        
+        <div class="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>🏆</span> Selesaikan Order Joki
+        </div>
+        <h3 class="text-xl font-bold text-white mb-1">Unggah Bukti Penyelesaian</h3>
+        <p class="text-slate-400 text-xs mb-6 font-mono" id="modalServiceName">Service Name</p>
+
+        <form action="/staff/joki/complete" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <input type="hidden" name="order_id" id="modalOrderId">
+
+            <div>
+                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                    Foto Bukti Screenshot Rank / Bintang <span class="text-red-400">*</span>
+                </label>
+                <input type="file" name="proof_image" accept="image/*" required class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-xs focus:border-cyan-400 outline-none file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-300 hover:file:bg-cyan-500/30">
+                <span class="text-[10px] text-slate-500 mt-1 block">Format: JPG, PNG, WEBP (Maksimal 2MB). Screenshot profil / lobby game yang memperlihatkan rank baru.</span>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                    Catatan Worker untuk Pelanggan (Opsional)
+                </label>
+                <textarea name="worker_notes" rows="3" placeholder="Contoh: Done ya bosku! Winrate 90%, rank Mythic Honor tercapai dengan aman. Terima kasih!" class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/10 text-white text-xs focus:border-cyan-400 outline-none resize-none"></textarea>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 transition">
+                    Konfirmasi Selesai & Kirim Bukti
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function switchStaffTab(tab) {
+        const btnActive = document.getElementById('tabBtnActive');
+        const btnQueue = document.getElementById('tabBtnQueue');
+        const btnCompleted = document.getElementById('tabBtnCompleted');
+
+        const contentActive = document.getElementById('contentActive');
+        const contentQueue = document.getElementById('contentQueue');
+        const contentCompleted = document.getElementById('contentCompleted');
+
+        const activeClass = "px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-lg shadow-cyan-500/20 shrink-0";
+        const inactiveClass = "px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-[#18181b] border border-white/10 text-slate-400 hover:text-white shrink-0";
+
+        btnActive.className = inactiveClass;
+        btnQueue.className = inactiveClass;
+        btnCompleted.className = inactiveClass;
+
+        contentActive.classList.add('hidden');
+        contentQueue.classList.add('hidden');
+        contentCompleted.classList.add('hidden');
+
+        if (tab === 'active') {
+            btnActive.className = activeClass;
+            contentActive.classList.remove('hidden');
+        } else if (tab === 'queue') {
+            btnQueue.className = activeClass;
+            contentQueue.classList.remove('hidden');
+        } else if (tab === 'completed') {
+            btnCompleted.className = activeClass;
+            contentCompleted.classList.remove('hidden');
+        }
+    }
+
+    const modal = document.getElementById('completeModal');
+    function openCompleteModal(orderId, serviceName) {
+        document.getElementById('modalOrderId').value = orderId;
+        document.getElementById('modalServiceName').innerText = '#' + orderId + ' - ' + serviceName;
+        modal.classList.remove('hidden');
+    }
+    function closeCompleteModal() {
+        modal.classList.add('hidden');
+    }
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeCompleteModal(); });
+
+    function copyToClipboard(text, label) {
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById('copyToast');
+            const toastText = document.getElementById('copyToastText');
+            toastText.textContent = `${label || 'Data'} "${text}" disalin!`;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 2500);
+        });
+    }
+
+    function filterStaffJoki() {
+        const query = (document.getElementById('staffJokiSearch').value || '').toLowerCase();
+        
+        // Filter active cards
+        document.querySelectorAll('.joki-active-card').forEach(card => {
+            const str = card.getAttribute('data-search') || '';
+            card.style.display = str.includes(query) ? '' : 'none';
+        });
+
+        // Filter queued rows
+        document.querySelectorAll('.joki-queue-row').forEach(row => {
+            const str = row.getAttribute('data-search') || '';
+            row.style.display = str.includes(query) ? '' : 'none';
+        });
+    }
+</script>
+
+<!-- Copy Feedback Toast Notification -->
+<div id="copyToast" class="fixed bottom-6 right-6 z-50 bg-[#18181b] border border-cyan-500/40 text-cyan-400 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 text-xs font-semibold">
+    <span>📋</span>
+    <span id="copyToastText">Berhasil disalin ke clipboard!</span>
+</div>

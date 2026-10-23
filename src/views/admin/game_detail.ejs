@@ -1,0 +1,365 @@
+<div class="space-y-6">
+
+    <!-- Top Breadcrumb & Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#0e0e13]/80 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden">
+        <div class="absolute -top-16 -left-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex items-center gap-4 relative z-10">
+            <!-- Game Thumbnail Avatar -->
+            <div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/10 bg-black/50 shrink-0 shadow-lg">
+                <img src="/images/games/<%= game.thumbnail %>" alt="<%= game.name %>" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <a href="/admin/games" class="text-xs text-slate-400 hover:text-cyan-400 font-semibold flex items-center gap-1.5 transition mb-1">
+                    <span>&larr;</span> Kembali ke Katalog Game
+                </a>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <h1 class="text-2xl font-black text-white tracking-tight"><%= game.name %></h1>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider <%= game.status === 'active' ? 'border border-emerald-500/30 text-emerald-400 bg-emerald-500/10' : 'border border-red-500/30 text-red-400 bg-red-500/10' %>">
+                        <%= game.status === 'active' ? '🟢 Aktif' : '🔴 Non-Aktif' %>
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/5 border border-white/10 text-slate-300">
+                        <%= game.category %>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 relative z-10">
+            <button onclick="document.getElementById('addProductModal').classList.remove('hidden')" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition">
+                <span>+</span> Tambah Denominasi Item
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Layout (2 Columns: Left Config, Right Products) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Column 1: Game Configuration Card -->
+        <div class="lg:col-span-1 bg-[#0e0e13]/80 backdrop-blur-xl p-6 rounded-3xl border border-white/10 h-fit shadow-xl">
+            <div class="flex items-center gap-2 pb-4 mb-4 border-b border-white/10">
+                <span class="text-cyan-400">⚙️</span>
+                <h3 class="font-bold text-white text-base">Konfigurasi Game</h3>
+            </div>
+
+            <form action="/admin/games/update" method="POST" enctype="multipart/form-data" class="space-y-4 text-xs">
+                <input type="hidden" name="id" value="<%= game.id %>">
+                
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1.5">Status Katalog</label>
+                    <select name="status" class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 transition">
+                        <option value="active" <%= game.status === 'active' ? 'selected' : '' %>>🟢 Aktif (Tampil di Web)</option>
+                        <option value="inactive" <%= game.status === 'inactive' ? 'selected' : '' %>>🔴 Non-Aktif (Hidden)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1.5">Format Input User ID</label>
+                    <select name="input_type" class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 transition">
+                        <option value="id_only" <%= game.input_type === 'id_only' ? 'selected' : '' %>>Hanya User ID (FF, PUBG, Valo)</option>
+                        <option value="id_zone" <%= game.input_type === 'id_zone' ? 'selected' : '' %>>User ID + Zone ID (MLBB)</option>
+                        <option value="id_server" <%= game.input_type === 'id_server' ? 'selected' : '' %>>User ID + Server (Genshin)</option>
+                    </select>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block font-bold text-slate-300 mb-1">Nama Game</label>
+                        <input type="text" name="name" value="<%= game.name %>" required class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 transition">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-300 mb-1">URL Slug</label>
+                        <input type="text" name="slug" value="<%= game.slug %>" required class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-cyan-400 font-mono outline-none focus:border-cyan-500 transition">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-300 mb-1">Developer</label>
+                            <input type="text" name="developer" value="<%= game.developer %>" class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 transition">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-300 mb-1">Kategori Genre</label>
+                            <input type="text" name="category" value="<%= game.category %>" class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 transition">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Instruksi / Panduan Top Up</label>
+                    <textarea name="instructions" rows="3" class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 transition"><%= game.instructions %></textarea>
+                </div>
+                
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Ganti Thumbnail Poster</label>
+                    <input type="file" name="thumbnail" accept="image/*" class="w-full text-xs text-slate-400 bg-black/60 p-2 rounded-xl border border-white/10 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20">
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-indigo-600 hover:opacity-90 text-white py-3 rounded-2xl font-bold shadow-lg shadow-cyan-500/20 transition">
+                    Simpan Konfigurasi Game
+                </button>
+            </form>
+        </div>
+
+        <!-- Column 2: Product Items & Denominations Management -->
+        <div class="lg:col-span-2 space-y-4">
+            
+            <!-- Quick Stats Summary for Products -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="p-4 rounded-2xl bg-[#0e0e13]/80 border border-white/10">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Produk</span>
+                    <div class="text-xl font-mono font-black text-white mt-1"><%= products.length %> Item</div>
+                </div>
+                <% 
+                    let totalProfit = 0;
+                    let maxPrice = 0;
+                    products.forEach(p => {
+                        totalProfit += (p.price - p.base_price);
+                        if (p.price > maxPrice) maxPrice = p.price;
+                    });
+                    const avgProfit = products.length > 0 ? Math.round(totalProfit / products.length) : 0;
+                %>
+                <div class="p-4 rounded-2xl bg-[#0e0e13]/80 border border-white/10">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rata-rata Margin</span>
+                    <div class="text-xl font-mono font-black text-emerald-400 mt-1">Rp <%= avgProfit.toLocaleString('id-ID') %></div>
+                </div>
+                <div class="p-4 rounded-2xl bg-[#0e0e13]/80 border border-white/10">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Item Tertinggi</span>
+                    <div class="text-xl font-mono font-black text-cyan-400 mt-1">Rp <%= Number(maxPrice).toLocaleString('id-ID') %></div>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="bg-[#0e0e13]/80 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden shadow-xl">
+                <!-- Search & Header Bar -->
+                <div class="p-4 border-b border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white/[0.02]">
+                    <div class="relative w-full sm:w-64">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500 text-xs">🔍</span>
+                        <input type="text" id="productSearchInput" onkeyup="filterProducts()" placeholder="Cari nama item / harga..." class="w-full pl-8 pr-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white text-xs outline-none focus:border-cyan-500">
+                    </div>
+                    <span class="text-xs text-slate-400 font-mono" id="productCountInfo">Menampilkan <%= products.length %> item</span>
+                </div>
+
+                <div class="overflow-x-auto max-h-[560px]">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-white/5 text-slate-400 uppercase font-bold text-[11px] sticky top-0 backdrop-blur-md border-b border-white/5">
+                            <tr>
+                                <th class="px-5 py-3.5">Nama Item / Nominal</th>
+                                <th class="px-5 py-3.5">Modal (Base)</th>
+                                <th class="px-5 py-3.5">Harga Jual</th>
+                                <th class="px-5 py-3.5">Profit / Margin</th>
+                                <th class="px-5 py-3.5 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5" id="productTableBody">
+                            <% if (products.length === 0) { %>
+                                <tr>
+                                    <td colspan="5" class="px-5 py-10 text-center text-slate-500">
+                                        <div class="text-2xl mb-1">📦</div>
+                                        <div class="font-bold text-white">Belum Ada Nominal Produk</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">Klik tombol "+ Tambah Denominasi Item" di atas.</div>
+                                    </td>
+                                </tr>
+                            <% } %>
+                            <% products.forEach(p => { 
+                                const profit = p.price - p.base_price;
+                                const marginPercent = p.base_price > 0 ? Math.round((profit / p.base_price) * 100) : 0;
+                            %>
+                            <tr class="hover:bg-white/[0.03] transition product-row" data-search="<%= (p.name + ' ' + p.price + ' ' + p.base_price).toLowerCase() %>">
+                                <td class="px-5 py-3.5">
+                                    <div class="font-bold text-white text-sm"><%= p.name %></div>
+                                    <div class="text-[10px] text-slate-500 font-mono">ID: #<%= p.id %></div>
+                                </td>
+                                <td class="px-5 py-3.5 font-mono text-slate-400">
+                                    Rp <%= Number(p.base_price).toLocaleString('id-ID') %>
+                                </td>
+                                <td class="px-5 py-3.5 font-mono font-bold text-cyan-400 text-sm">
+                                    Rp <%= Number(p.price).toLocaleString('id-ID') %>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    <div class="font-mono text-xs font-bold <%= profit >= 0 ? 'text-emerald-400' : 'text-red-400' %>">
+                                        <%= profit >= 0 ? '+' : '' %>Rp <%= Number(profit).toLocaleString('id-ID') %>
+                                    </div>
+                                    <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold font-mono mt-0.5 <%= profit >= 0 ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-red-500/10 text-red-300 border border-red-500/20' %>">
+                                        <%= marginPercent %>% margin
+                                    </span>
+                                </td>
+                                <td class="px-5 py-3.5 text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <button onclick="openEditModal('<%= p.id %>', '<%= p.name %>', '<%= p.price %>', '<%= p.base_price %>')" class="p-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 transition" title="Edit Item">
+                                            ✏️
+                                        </button>
+                                        <form action="/admin/products/delete" method="POST" onsubmit="return confirm('Hapus item <%= p.name %>?');" class="inline">
+                                            <input type="hidden" name="id" value="<%= p.id %>">
+                                            <input type="hidden" name="game_id" value="<%= game.id %>">
+                                            <button type="submit" class="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition" title="Hapus Item">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MODAL ADD PRODUCT -->
+<div id="addProductModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div class="bg-[#0e0e13] w-full max-w-md rounded-3xl border border-white/10 p-6 shadow-2xl relative">
+        <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+            <div>
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <span class="text-emerald-400">+</span> Tambah Denominasi Produk
+                </h3>
+                <p class="text-[11px] text-slate-400"><%= game.name %></p>
+            </div>
+            <button onclick="document.getElementById('addProductModal').classList.add('hidden')" class="p-1 rounded-lg text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <form action="/admin/products/add" method="POST" class="space-y-4 text-xs">
+            <input type="hidden" name="game_slug" value="<%= game.slug %>">
+            <input type="hidden" name="game_id" value="<%= game.id %>">
+            
+            <div>
+                <label class="block font-bold text-slate-300 mb-1">Nama Item / Nominal</label>
+                <input type="text" name="name" placeholder="Contoh: 86 Diamonds atau 300 Genesis Crystals" required class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 transition">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Harga Modal (Rp)</label>
+                    <input type="number" id="add_base_price" name="base_price" placeholder="18000" required oninput="calcAddMargin()" class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white font-mono outline-none focus:border-cyan-500 transition">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Harga Jual (Rp)</label>
+                    <input type="number" id="add_price" name="price" placeholder="20000" required oninput="calcAddMargin()" class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-cyan-400 font-mono font-bold outline-none focus:border-cyan-500 transition">
+                </div>
+            </div>
+
+            <!-- Live Margin Calculator Preview -->
+            <div id="addMarginPreview" class="p-3 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between text-slate-400">
+                <span>Estimasi Margin Bersih:</span>
+                <span id="addProfitText" class="font-mono font-bold text-slate-300">Rp 0 (0%)</span>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('addProductModal').classList.add('hidden')" class="flex-1 bg-white/5 hover:bg-white/10 py-2.5 rounded-xl text-slate-300 font-bold transition">Batal</button>
+                <button type="submit" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 py-2.5 rounded-xl text-white font-bold shadow-lg shadow-emerald-500/20 transition">Simpan Item</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL EDIT PRODUCT -->
+<div id="editProductModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div class="bg-[#0e0e13] w-full max-w-md rounded-3xl border border-white/10 p-6 shadow-2xl relative">
+        <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+            <div>
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <span class="text-indigo-400">✏️</span> Edit Denominasi Produk
+                </h3>
+                <p class="text-[11px] text-slate-400"><%= game.name %></p>
+            </div>
+            <button onclick="document.getElementById('editProductModal').classList.add('hidden')" class="p-1 rounded-lg text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <form action="/admin/products/edit" method="POST" class="space-y-4 text-xs">
+            <input type="hidden" name="game_id" value="<%= game.id %>">
+            <input type="hidden" id="edit_id" name="id">
+            
+            <div>
+                <label class="block font-bold text-slate-300 mb-1">Nama Item / Nominal</label>
+                <input type="text" id="edit_name" name="name" required class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white outline-none focus:border-cyan-500 transition">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Harga Modal (Rp)</label>
+                    <input type="number" id="edit_base_price" name="base_price" required oninput="calcEditMargin()" class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-white font-mono outline-none focus:border-cyan-500 transition">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Harga Jual (Rp)</label>
+                    <input type="number" id="edit_price" name="price" required oninput="calcEditMargin()" class="w-full bg-black/60 border border-white/10 rounded-xl p-2.5 text-cyan-400 font-mono font-bold outline-none focus:border-cyan-500 transition">
+                </div>
+            </div>
+
+            <!-- Live Margin Calculator Preview -->
+            <div id="editMarginPreview" class="p-3 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between text-slate-400">
+                <span>Estimasi Margin Bersih:</span>
+                <span id="editProfitText" class="font-mono font-bold text-slate-300">Rp 0 (0%)</span>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('editProductModal').classList.add('hidden')" class="flex-1 bg-white/5 hover:bg-white/10 py-2.5 rounded-xl text-slate-300 font-bold transition">Batal</button>
+                <button type="submit" class="flex-1 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:opacity-90 py-2.5 rounded-xl text-white font-bold shadow-lg shadow-cyan-500/20 transition">Update Item</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function filterProducts() {
+        const query = document.getElementById('productSearchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('.product-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const searchData = row.getAttribute('data-search') || '';
+            if (searchData.includes(query)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('productCountInfo').innerText = `Menampilkan ${visibleCount} item`;
+    }
+
+    function calcAddMargin() {
+        const base = Number(document.getElementById('add_base_price').value) || 0;
+        const sell = Number(document.getElementById('add_price').value) || 0;
+        const profit = sell - base;
+        const pct = base > 0 ? Math.round((profit / base) * 100) : 0;
+        const textEl = document.getElementById('addProfitText');
+        
+        if (profit >= 0) {
+            textEl.className = 'font-mono font-bold text-emerald-400';
+            textEl.innerText = `+Rp ${profit.toLocaleString('id-ID')} (+${pct}%)`;
+        } else {
+            textEl.className = 'font-mono font-bold text-red-400';
+            textEl.innerText = `-Rp ${Math.abs(profit).toLocaleString('id-ID')} (${pct}%)`;
+        }
+    }
+
+    function calcEditMargin() {
+        const base = Number(document.getElementById('edit_base_price').value) || 0;
+        const sell = Number(document.getElementById('edit_price').value) || 0;
+        const profit = sell - base;
+        const pct = base > 0 ? Math.round((profit / base) * 100) : 0;
+        const textEl = document.getElementById('editProfitText');
+        
+        if (profit >= 0) {
+            textEl.className = 'font-mono font-bold text-emerald-400';
+            textEl.innerText = `+Rp ${profit.toLocaleString('id-ID')} (+${pct}%)`;
+        } else {
+            textEl.className = 'font-mono font-bold text-red-400';
+            textEl.innerText = `-Rp ${Math.abs(profit).toLocaleString('id-ID')} (${pct}%)`;
+        }
+    }
+
+    function openEditModal(id, name, price, base) {
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_price').value = price;
+        document.getElementById('edit_base_price').value = base;
+        calcEditMargin();
+        document.getElementById('editProductModal').classList.remove('hidden');
+    }
+</script>

@@ -1,5 +1,3 @@
-// AuthController.php
-
 <?php
 
 class AuthController {

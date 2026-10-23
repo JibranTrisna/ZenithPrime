@@ -1,0 +1,223 @@
+<div class="space-y-6">
+
+    <!-- Top Heading & Add Button -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-black text-white tracking-tight">Katalog & Manajemen Game</h2>
+            <p class="text-slate-400 text-xs sm:text-sm mt-1">Kelola judul game yang aktif di katalog, atur daftar denominasi produk, dan upload gambar thumbnail.</p>
+        </div>
+        <div>
+            <button onclick="openAddGameModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2">
+                <span>+</span>
+                <span>Tambah Game Baru</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search & Category Filters -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#121217] p-4 rounded-2xl border border-white/10">
+        <!-- Category Filter Tabs -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+            <button onclick="filterGameCategory('all')" id="catBtn-all" class="game-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md">
+                Semua Game (<%= games.length %>)
+            </button>
+            <button onclick="filterGameCategory('MOBA')" id="catBtn-MOBA" class="game-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white hover:bg-white/5">
+                MOBA
+            </button>
+            <button onclick="filterGameCategory('FPS')" id="catBtn-FPS" class="game-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white hover:bg-white/5">
+                FPS
+            </button>
+            <button onclick="filterGameCategory('Battle Royale')" id="catBtn-Battle-Royale" class="game-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white hover:bg-white/5">
+                Battle Royale
+            </button>
+            <button onclick="filterGameCategory('RPG')" id="catBtn-RPG" class="game-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white hover:bg-white/5">
+                RPG / Open World
+            </button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative w-full md:w-64">
+            <input type="text" id="gameSearchInput" onkeyup="searchGames()" placeholder="Cari nama game atau developer..." 
+                   class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:border-indigo-500 outline-none transition">
+            <svg class="w-4 h-4 text-slate-500 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+    </div>
+
+    <!-- Games Grid Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5" id="gamesGrid">
+        <% games.forEach(game => { %>
+        <div class="game-card bg-[#121217] rounded-2xl overflow-hidden border border-white/10 group relative hover:border-indigo-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 flex flex-col justify-between"
+             data-category="<%= game.category %>" 
+             data-name="<%= game.name.toLowerCase() %>" 
+             data-developer="<%= (game.developer || '').toLowerCase() %>">
+            
+            <div>
+                <!-- Status Badge -->
+                <div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase backdrop-blur-md z-10 border border-white/10
+                    <%= game.status === 'active' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30' %>">
+                    <%= game.status %>
+                </div>
+
+                <!-- Thumbnail with zoom effect -->
+                <div class="aspect-[4/3] bg-black/50 relative overflow-hidden">
+                    <img src="/images/games/<%= game.thumbnail %>" 
+                         onerror="this.src='/images/ZenithPrimeLogoTransparant.png'" 
+                         alt="<%= game.name %>"
+                         class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#121217] via-transparent to-transparent opacity-80"></div>
+                </div>
+
+                <div class="p-4">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="px-1.5 py-0.5 rounded bg-white/5 text-[9px] text-cyan-300 font-mono font-semibold"><%= game.category %></span>
+                        <span class="text-[10px] text-slate-500">• <%= game.developer %></span>
+                    </div>
+                    <h4 class="font-bold text-white truncate text-sm group-hover:text-cyan-400 transition" title="<%= game.name %>">
+                        <%= game.name %>
+                    </h4>
+                    <p class="text-[11px] font-mono text-slate-500 mt-0.5 truncate">/<%= game.slug %></p>
+                </div>
+            </div>
+
+            <!-- Action Buttons Footer -->
+            <div class="p-4 pt-0">
+                <div class="flex gap-2">
+                    <a href="/admin/games/<%= game.id %>" class="flex-1 bg-indigo-600/10 hover:bg-indigo-600 text-indigo-300 hover:text-white text-center py-2 rounded-xl text-xs font-bold transition border border-indigo-500/20 flex items-center justify-center gap-1">
+                        <span>⚙️</span>
+                        <span>Kelola</span>
+                    </a>
+                    <form action="/admin/games/delete" method="POST" onsubmit="return confirm('Hapus game <%= game.name %>? Semua produk denominasi di dalamnya juga akan terhapus.');">
+                        <input type="hidden" name="id" value="<%= game.id %>">
+                        <button class="bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white px-3 py-2 rounded-xl text-xs transition border border-red-500/20" title="Hapus Game">
+                            🗑️
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <% }) %>
+    </div>
+
+    <% if (games.length === 0) { %>
+        <div class="text-center py-20 border-2 border-dashed border-white/10 rounded-3xl bg-[#121217]">
+            <p class="text-slate-500 mb-4">Belum ada game yang ditambahkan.</p>
+            <button onclick="openAddGameModal()" class="text-indigo-400 font-bold hover:text-indigo-300 text-sm">Tambah Game Sekarang</button>
+        </div>
+    <% } %>
+</div>
+
+<!-- Add Game Modal -->
+<div id="addGameModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all">
+    <div class="bg-[#121217] w-full max-w-md rounded-2xl border border-white/10 p-6 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex items-center justify-between mb-6 pb-3 border-b border-white/10">
+            <h3 class="text-lg font-black text-white">Tambah Game Baru</h3>
+            <button onclick="closeAddGameModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+        </div>
+        
+        <form action="/admin/games/add" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <div>
+                <label class="text-[11px] text-slate-400 uppercase font-bold mb-1 block">Nama Game <span class="text-red-400">*</span></label>
+                <input type="text" name="name" id="newGameName" oninput="autoGenerateSlug()" placeholder="Contoh: Mobile Legends: Bang Bang" required 
+                       class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-white text-xs focus:border-indigo-500 outline-none transition">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[11px] text-slate-400 uppercase font-bold mb-1 block">Slug URL <span class="text-red-400">*</span></label>
+                    <input type="text" name="slug" id="newGameSlug" placeholder="mobile-legends" required 
+                           class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-white text-xs focus:border-indigo-500 outline-none transition font-mono">
+                </div>
+                <div>
+                    <label class="text-[11px] text-slate-400 uppercase font-bold mb-1 block">Developer <span class="text-red-400">*</span></label>
+                    <input type="text" name="developer" placeholder="Moonton" required 
+                           class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-white text-xs focus:border-indigo-500 outline-none transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[11px] text-slate-400 uppercase font-bold mb-1 block">Kategori Genre</label>
+                <select name="category" class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-white text-xs focus:border-indigo-500 outline-none transition">
+                    <option value="MOBA">MOBA</option>
+                    <option value="FPS">FPS</option>
+                    <option value="Battle Royale">Battle Royale</option>
+                    <option value="RPG">RPG</option>
+                    <option value="Open World">Open World</option>
+                    <option value="Casual">Casual</option>
+                    <option value="Sports">Sports</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-[11px] text-slate-400 uppercase font-bold mb-1 block">Thumbnail Gambar <span class="text-red-400">*</span></label>
+                <input type="file" name="thumbnail" accept="image/*" required 
+                       class="w-full bg-black/50 border border-white/10 rounded-xl p-2 text-slate-400 text-xs file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500">
+                <p class="text-[10px] text-slate-500 mt-1">*Format: JPG, PNG, WEBP. Maksimal 2MB.</p>
+            </div>
+
+            <div class="flex gap-3 mt-6 pt-4 border-t border-white/10">
+                <button type="button" onclick="closeAddGameModal()" class="flex-1 bg-white/5 hover:bg-white/10 text-white py-2.5 rounded-xl font-bold text-xs transition">Batal</button>
+                <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl font-bold text-xs transition shadow-lg shadow-indigo-600/20">Simpan Game</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let activeCat = 'all';
+
+    function openAddGameModal() {
+        document.getElementById('addGameModal').classList.remove('hidden');
+    }
+
+    function closeAddGameModal() {
+        document.getElementById('addGameModal').classList.add('hidden');
+    }
+
+    function autoGenerateSlug() {
+        const name = document.getElementById('newGameName').value;
+        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        document.getElementById('newGameSlug').value = slug;
+    }
+
+    function filterGameCategory(category) {
+        activeCat = category;
+        const buttons = document.querySelectorAll('.game-cat-btn');
+        buttons.forEach(btn => {
+            btn.className = "game-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white hover:bg-white/5";
+        });
+
+        const activeId = category === 'all' ? 'catBtn-all' : 'catBtn-' + category.replace(/\s+/g, '-');
+        const activeBtn = document.getElementById(activeId);
+        if (activeBtn) {
+            activeBtn.className = "game-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-md";
+        }
+
+        applyGameFilters();
+    }
+
+    function searchGames() {
+        applyGameFilters();
+    }
+
+    function applyGameFilters() {
+        const query = (document.getElementById('gameSearchInput').value || '').toLowerCase().trim();
+        const cards = document.querySelectorAll('.game-card');
+
+        cards.forEach(card => {
+            const cat = card.getAttribute('data-category');
+            const name = card.getAttribute('data-name');
+            const dev = card.getAttribute('data-developer');
+
+            let matchCat = (activeCat === 'all' || cat.toLowerCase().includes(activeCat.toLowerCase()));
+            let matchSearch = !query || name.includes(query) || dev.includes(query);
+
+            if (matchCat && matchSearch) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
