@@ -512,4 +512,156 @@ INSERT INTO `users` (`id`, `name`, `email`, `phone`, `password`, `role`, `create
 (2, 'Staff Jibran', 'StaffJibran@gmail.com', '085697759272', '$2b$10$t2.ZSLb0qZgSrEu8VtQXMeqpiLTLdNhBXdXLowjlo6moI5OMGp8oG', 'staff', '2026-01-05 16:59:16', '2026-01-05 16:59:44'),
 (1, 'Admin Jibran', 'AdminJibran@gmail.com', '085697759271', '$2b$10$2Ffe/Hs4QG2dvyojuI42qeC6QC9U2Is91dRull.yY11Cp9OKbOcwu', 'admin', '2026-01-05 16:54:01', '2026-01-05 16:57:23'),
 (5, 'JibranTrisna', 'Jibran30@gmail.com', '085697759273', '$2b$10$5RHM./zHcN5QKApuIZO...Zg6MW6.UJeuHFabYnfUc80aNOPcBrOe', 'user', '2026-01-05 17:00:57', '2026-01-05 17:00:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cs_tickets`
+--
+
+DROP TABLE IF EXISTS `cs_tickets`;
+CREATE TABLE IF NOT EXISTS `cs_tickets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `room_id` varchar(50) NOT NULL,
+  `user_id` int NOT NULL,
+  `category` varchar(50) DEFAULT 'GENERAL_QUERY',
+  `urgency` enum('low','medium','high','urgent') DEFAULT 'low',
+  `status` enum('needs_followup','in_progress','resolved','ai_handled') DEFAULT 'ai_handled',
+  `summary` varchar(255) DEFAULT 'Chatbot Conversation',
+  `order_id` varchar(100) DEFAULT NULL,
+  `last_user_message` text,
+  `last_ai_message` text,
+  `is_complaint` tinyint(1) DEFAULT '0',
+  `is_ai_paused` tinyint(1) DEFAULT '0',
+  `handled_by` int DEFAULT NULL,
+  `notes` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `room_id` (`room_id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_is_complaint` (`is_complaint`),
+  KEY `idx_urgency` (`urgency`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_resets`
+--
+
+DROP TABLE IF EXISTS `password_resets`;
+CREATE TABLE IF NOT EXISTS `password_resets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_email` (`email`),
+  KEY `idx_token` (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `joki_services`
+--
+
+DROP TABLE IF EXISTS `joki_services`;
+CREATE TABLE IF NOT EXISTS `joki_services` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `game_slug` varchar(100) NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `price` decimal(15,2) NOT NULL,
+  `base_price` decimal(15,2) NOT NULL,
+  `min_order` int DEFAULT '1',
+  `estimate_time` varchar(100) DEFAULT '1-24 Jam',
+  `description` text,
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_game_slug` (`game_slug`),
+  KEY `idx_category` (`category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `joki_services` (`id`, `game_slug`, `category`, `name`, `price`, `base_price`, `min_order`, `estimate_time`, `description`, `is_active`) VALUES
+(1, 'mobile-legends', 'Joki Per Bintang', 'Master ke Grandmaster (Per Bintang)', 4000.00, 2500.00, 3, '1-3 Jam', 'Joki rank per bintang rank Master. Fast win streak.', 1),
+(2, 'mobile-legends', 'Joki Per Bintang', 'Grandmaster ke Epic (Per Bintang)', 5000.00, 3000.00, 3, '1-4 Jam', 'Joki rank per bintang rank Grandmaster.', 1),
+(3, 'mobile-legends', 'Joki Per Bintang', 'Epic ke Legend (Per Bintang)', 7500.00, 5000.00, 3, '2-6 Jam', 'Joki rank per bintang rank Epic menuju Legend.', 1),
+(4, 'mobile-legends', 'Joki Per Bintang', 'Legend ke Mythic (Per Bintang)', 10000.00, 7000.00, 3, '3-8 Jam', 'Joki rank per bintang rank Legend menuju Mythic.', 1),
+(5, 'mobile-legends', 'Joki Per Bintang', 'Mythic Grading (10 Match Penempatan)', 120000.00, 85000.00, 1, '4-12 Jam', 'Joki placement match Mythic garansi winrate tinggi.', 1),
+(6, 'mobile-legends', 'Joki Per Bintang', 'Mythic ke Mythical Honor (Per Bintang)', 16000.00, 11000.00, 2, '4-12 Jam', 'Joki bintang rank Mythic 0-24 Star.', 1),
+(7, 'mobile-legends', 'Joki Per Bintang', 'Mythical Honor ke Glory (Per Bintang)', 22000.00, 16000.00, 2, '6-24 Jam', 'Joki bintang rank Honor 25-49 Star.', 1),
+(8, 'mobile-legends', 'Joki Per Bintang', 'Mythical Glory ke Immortal (Per Bintang)', 30000.00, 22000.00, 2, '12-36 Jam', 'Joki bintang rank Glory 50-99 Star.', 1),
+(9, 'mobile-legends', 'Paket Rank Hemat', 'Paket Full Epic V ke Legend V', 175000.00, 125000.00, 1, '6-12 Jam', 'Paket hemat joki rank Epic V langsung tembus Legend V.', 1),
+(10, 'mobile-legends', 'Paket Rank Hemat', 'Paket Full Legend V ke Mythic', 240000.00, 175000.00, 1, '8-16 Jam', 'Paket hemat joki rank Legend V langsung tembus Mythic.', 1),
+(11, 'mobile-legends', 'Paket Rank Hemat', 'Paket All-In Epic V ke Mythic', 399000.00, 290000.00, 1, '18-36 Jam', 'Paket combo terlaris Epic V sampai Mythic.', 1),
+(12, 'mobile-legends', 'Joki Classic / WR', 'Joki Classic Winrate (Per Match)', 6000.00, 4000.00, 5, '1-6 Jam', 'Menaikkan winrate hero favorit di mode Classic. Garansi win.', 1),
+(13, 'valorant', 'Joki Rank Tier', 'Iron ke Bronze (Per Tier)', 45000.00, 3000.00, 1, '2-6 Jam', 'Joki tier rank Valorant Iron.', 1),
+(14, 'valorant', 'Joki Rank Tier', 'Bronze ke Silver (Per Tier)', 65000.00, 45000.00, 1, '3-8 Jam', 'Joki tier rank Valorant Bronze.', 1),
+(15, 'valorant', 'Joki Rank Tier', 'Silver ke Gold (Per Tier)', 90000.00, 65000.00, 1, '4-12 Jam', 'Joki tier rank Valorant Silver.', 1),
+(16, 'valorant', 'Joki Rank Tier', 'Gold ke Platinum (Per Tier)', 135000.00, 95000.00, 1, '6-18 Jam', 'Joki tier rank Valorant Gold.', 1),
+(17, 'valorant', 'Joki Rank Tier', 'Platinum ke Diamond (Per Tier)', 190000.00, 140000.00, 1, '12-24 Jam', 'Joki tier rank Valorant Platinum.', 1),
+(18, 'valorant', 'Joki Rank Tier', '5 Match Placement (Rank Awal)', 150000.00, 110000.00, 1, '4-10 Jam', 'Joki placement match 5 game dengan MMR tinggi.', 1),
+(19, 'free-fire', 'Joki Rank BR / CS', 'Silver ke Gold (Full Tier)', 35000.00, 25000.00, 1, '1-3 Jam', 'Joki rank Free Fire Silver ke Gold.', 1),
+(20, 'free-fire', 'Joki Rank BR / CS', 'Gold ke Platinum (Full Tier)', 60000.00, 40000.00, 1, '2-5 Jam', 'Joki rank Free Fire Gold ke Platinum.', 1),
+(21, 'free-fire', 'Joki Rank BR / CS', 'Platinum ke Diamond (Full Tier)', 95000.00, 65000.00, 1, '4-8 Jam', 'Joki rank Free Fire Platinum ke Diamond.', 1),
+(22, 'free-fire', 'Joki Rank BR / CS', 'Diamond ke Master / Heroic', 160000.00, 110000.00, 1, '6-14 Jam', 'Joki rank Free Fire Diamond ke Master.', 1),
+(23, 'honor-of-kings', 'Joki Per Bintang', 'Gold ke Platinum (Per Bintang)', 4500.00, 3000.00, 3, '1-4 Jam', 'Joki rank HOK per bintang rank Gold.', 1),
+(24, 'honor-of-kings', 'Joki Per Bintang', 'Platinum ke Diamond (Per Bintang)', 7000.00, 4500.00, 3, '2-6 Jam', 'Joki rank HOK per bintang rank Platinum.', 1),
+(25, 'honor-of-kings', 'Joki Per Bintang', 'Diamond ke Master (Per Bintang)', 11000.00, 7500.00, 3, '3-8 Jam', 'Joki rank HOK per bintang rank Diamond.', 1),
+(26, 'honor-of-kings', 'Joki Per Bintang', 'Master ke Grandmaster (Per Bintang)', 17000.00, 12000.00, 2, '5-12 Jam', 'Joki rank HOK per bintang rank Master.', 1),
+(27, 'genshin-impact', 'Quest & Explore', 'Spiral Abyss Lantai 9-12 (36 Star Full)', 95000.00, 65000.00, 1, '2-6 Jam', 'Clear Spiral Abyss full 36 bintang.', 1),
+(28, 'genshin-impact', 'Quest & Explore', 'Eksplorasi Region 100% (Per Region)', 150000.00, 100000.00, 1, '1-3 Hari', 'Eksplorasi map 100% include all chest & culus.', 1),
+(29, 'genshin-impact', 'Rawat Akun', 'Rawat Akun Mingguan (Daily + Resin + Event)', 80000.00, 55000.00, 1, '7 Hari', 'Daily commission, spend 160 resin setiap hari, claim event reward.', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `joki_orders`
+--
+
+DROP TABLE IF EXISTS `joki_orders`;
+CREATE TABLE IF NOT EXISTS `joki_orders` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `order_id` varchar(50) NOT NULL,
+  `user_id` int NOT NULL,
+  `service_id` int DEFAULT '0',
+  `game_slug` varchar(100) NOT NULL,
+  `service_name` varchar(150) NOT NULL,
+  `request_type` varchar(100) DEFAULT 'Push Rank',
+  `current_rank` varchar(100) DEFAULT NULL,
+  `target_rank` varchar(100) DEFAULT NULL,
+  `play_mode` varchar(50) DEFAULT 'solo',
+  `quantity` int DEFAULT '1',
+  `total_amount` decimal(15,2) NOT NULL,
+  `login_via` varchar(50) NOT NULL,
+  `account_id` varchar(150) NOT NULL,
+  `account_password` varchar(255) DEFAULT NULL,
+  `nickname` varchar(100) DEFAULT NULL,
+  `whatsapp` varchar(30) NOT NULL,
+  `request_hero` varchar(255) DEFAULT NULL,
+  `notes` text,
+  `snap_token` varchar(255) DEFAULT NULL,
+  `payment_status` enum('pending','success','failed','expired') DEFAULT 'pending',
+  `payment_type` varchar(50) DEFAULT NULL,
+  `order_status` enum('unpaid','queued','in_progress','completed','canceled') DEFAULT 'unpaid',
+  `worker_id` int DEFAULT NULL,
+  `worker_notes` text,
+  `proof_image` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `order_id` (`order_id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_service_id` (`service_id`),
+  KEY `idx_order_id` (`order_id`),
+  KEY `idx_order_status` (`order_status`),
+  KEY `idx_payment_status` (`payment_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 COMMIT;
