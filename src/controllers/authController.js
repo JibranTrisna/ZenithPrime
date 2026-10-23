@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const { accountLockoutManager, validatePasswordStrength } = require('../middlewares/securityMiddleware');
 const { logSecurityEvent, SEVERITY } = require('../utils/securityLogger');
+const { generateDeviceFingerprint } = require('../utils/cryptoUtils');
 
 exports.getLoginPage = (req, res) => {
     if (req.session.user) {
@@ -130,6 +131,10 @@ exports.loginProcess = async (req, res) => {
             email: user.email,
             role: user.role
         };
+        req.session.deviceFingerprint = generateDeviceFingerprint(req);
+        req.session.loginIp = req.ip;
+        req.session.createdAt = Date.now();
+        req.session.lastActivity = Date.now();
 
         logSecurityEvent('AUTH_SUCCESS', `Login berhasil untuk User ID: ${user.id} (${user.email}), Role: ${user.role}`, req, SEVERITY.INFO);
 

@@ -13,7 +13,17 @@ const hpp = require('hpp');
 dotenv.config();
 
 const db = require('./src/config/database');
-const { globalLimiter, sqlInjectionDetector, xssSanitizer, originValidator } = require('./src/middlewares/securityMiddleware');
+const { 
+    globalLimiter, 
+    sqlInjectionDetector, 
+    xssSanitizer, 
+    originValidator,
+    ipJailMiddleware,
+    pathTraversalDetector,
+    sessionSecurityGuard,
+    ipJailManager,
+    accountLockoutManager
+} = require('./src/middlewares/securityMiddleware');
 const aiChatbotService = require('./src/services/aiChatbotService');
 
 // Pastikan tabel cs_tickets selalu terinisialisasi
@@ -70,7 +80,13 @@ if (process.env.TRUST_PROXY) {
 }
 
 // ==========================================
-// 🛡️ 1. HELMET: SECURITY HEADERS & CONTENT SECURITY POLICY
+// 🛡️ 0. ZERO-TRUST PERIMETER: ADAPTIVE IP JAIL & PATH TRAVERSAL SHIELD
+// ==========================================
+app.use(ipJailMiddleware);
+app.use(pathTraversalDetector);
+
+// ==========================================
+// 🛡️ 1. HELMET: GOOGLE-GRADE SECURITY HEADERS & CONTENT SECURITY POLICY
 // ==========================================
 const MIDTRANS_DOMAINS = ['https://*.midtrans.com', 'https://*.veritrans.co.id'];
 
@@ -97,13 +113,22 @@ app.use(helmet({
             formAction: ["'self'", ...MIDTRANS_DOMAINS],
             objectSrc: ["'none'"],
             frameAncestors: ["'self'"], // Anti-Clickjacking
-            // Jangan paksa HTTPS saat development di http://localhost
             upgradeInsecureRequests: isProduction ? [] : null
         }
     },
     crossOriginEmbedderPolicy: false,
-    hsts: isProduction // HSTS hanya aktif di production (HTTPS)
+    crossOriginOpenerPolicy: { policy: "same-origin" },
+    crossOriginResourcePolicy: { policy: "same-origin" },
+    originAgentCluster: true,
+    permittedCrossDomainPolicies: { permittedPolicies: "none" },
+    hsts: isProduction ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false
 }));
+
+// Google-Grade Permissions-Policy: Membatasi akses sensor dan hardware browser
+app.use((req, res, next) => {
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self "https://*.midtrans.com"), usb=(), accelerometer=(), gyroscope=(), screen-wake-lock=()');
+    next();
+});
 
 // ==========================================
 // 📂 2. STATIC ASSETS (sebelum rate limiter agar gambar/video tidak menghabiskan kuota)
@@ -158,6 +183,9 @@ const sessionMiddleware = session({
     }
 });
 app.use(sessionMiddleware);
+
+// 🛡️ Google Risk-Based Session Guard (Anti Session Hijacking, Inactivity & Lifetime Timeout)
+app.use(sessionSecurityGuard);
 
 app.use(flash());
 app.use((req, res, next) => {
@@ -629,7 +657,7 @@ app.use((err, req, res, next) => {
 server.listen(PORT, () => {
     console.log(`--------------------------------------------------`);
     console.log(`🚀 Server & Socket.io ZenithPrime berjalan di http://localhost:${PORT}`);
-    console.log(`🛡️  Security: Helmet/CSP, Rate Limiter, SQLi Shield, HPP, Secure Session, Socket Auth, XSS Sanitizer, Anti-CSRF, Account Lockout, Audit Log`);
+    console.log(`🛡️  Security [Google-Grade]: Helmet/CSP L3, Permissions-Policy, IP Jail Tarpit, Anti-Hijacking, Path Traversal Shield, XSS/SQLi Shield, Account Lockout`);
     console.log(`📅 Waktu Mulai: ${new Date().toLocaleString()}`);
     console.log(`--------------------------------------------------`);
 });

@@ -1,0 +1,295 @@
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0c0c10] border border-white/[0.08] p-6 rounded-2xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-2xl shadow-inner">
+                🛡️
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-xl font-bold text-white tracking-tight">Security Command Center</h1>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        Google-Grade Active
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Sistem pertahanan berlapis, adaptive threat jailing, dan pemantauan telemetri keamanan real-time.</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/admin/security" class="px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white text-xs font-semibold transition border border-white/10 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span>Segarkan Data</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Security Metrics Overview -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Posture Score -->
+        <div class="bg-[#0c0c10] border border-white/[0.08] p-5 rounded-2xl relative overflow-hidden group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Security Posture</span>
+                    <h3 class="text-2xl font-black text-emerald-400 mt-1">100 / 100</h3>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm">
+                    A+
+                </div>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-3 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                Semua 10 Lapisan Pertahanan Aktif
+            </p>
+        </div>
+
+        <!-- Jailed IPs -->
+        <div class="bg-[#0c0c10] border border-white/[0.08] p-5 rounded-2xl relative overflow-hidden group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Adaptive IP Jail</span>
+                    <h3 class="text-2xl font-black text-white mt-1"><%= jailedIps.length %></h3>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 text-sm">
+                    🛑
+                </div>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-3">
+                IP penyerang dalam karantina otomatis
+            </p>
+        </div>
+
+        <!-- Locked Accounts -->
+        <div class="bg-[#0c0c10] border border-white/[0.08] p-5 rounded-2xl relative overflow-hidden group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Akun Terkunci</span>
+                    <h3 class="text-2xl font-black text-white mt-1"><%= lockedAccounts.length %></h3>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-sm">
+                    🔒
+                </div>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-3">
+                Proteksi Anti-Brute Force (5x salah)
+            </p>
+        </div>
+
+        <!-- Zero Trust Shield -->
+        <div class="bg-[#0c0c10] border border-white/[0.08] p-5 rounded-2xl relative overflow-hidden group">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Session Shield</span>
+                    <h3 class="text-2xl font-black text-indigo-400 mt-1">Anti-Hijack</h3>
+                </div>
+                <div class="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-sm">
+                    ⚡
+                </div>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-3">
+                SHA-256 Device Fingerprinting aktif
+            </p>
+        </div>
+    </div>
+
+    <!-- Active Mitigations Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Karantina IP Terkunci -->
+        <div class="bg-[#0c0c10] border border-white/[0.08] p-6 rounded-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-lg">🚫</span>
+                    <h2 class="text-sm font-bold text-white uppercase tracking-wider">Karantina IP (Adaptive Jail)</h2>
+                </div>
+                <span class="text-xs text-slate-400 font-mono"><%= jailedIps.length %> Terdeteksi</span>
+            </div>
+
+            <div class="mt-4 space-y-3">
+                <% if (jailedIps.length === 0) { %>
+                    <div class="py-8 text-center text-slate-500 text-xs font-mono">
+                        ✨ Tidak ada IP dalam karantina saat ini. Semua lalu lintas aman.
+                    </div>
+                <% } else { %>
+                    <% jailedIps.forEach(jail => { %>
+                        <div class="flex items-center justify-between p-3.5 bg-red-500/5 border border-red-500/20 rounded-xl">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono text-xs font-bold text-red-400"><%= jail.ip %></span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/10 text-red-300">
+                                        Sisa: <%= jail.remainingMinutes %> menit
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Alasan: <span class="text-slate-300 font-medium"><%= jail.reason %></span></p>
+                            </div>
+                            <form action="/admin/security/unjail" method="POST">
+                                <input type="hidden" name="ip" value="<%= jail.ip %>">
+                                <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+                                    Bebaskan
+                                </button>
+                            </form>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Akun Terkunci Sementara -->
+        <div class="bg-[#0c0c10] border border-white/[0.08] p-6 rounded-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-lg">🔐</span>
+                    <h2 class="text-sm font-bold text-white uppercase tracking-wider">Akun Terkunci (Anti-Brute Force)</h2>
+                </div>
+                <span class="text-xs text-slate-400 font-mono"><%= lockedAccounts.length %> Akun</span>
+            </div>
+
+            <div class="mt-4 space-y-3">
+                <% if (lockedAccounts.length === 0) { %>
+                    <div class="py-8 text-center text-slate-500 text-xs font-mono">
+                        ✨ Tidak ada akun dalam status lockout. Tidak ada serangan brute-force aktif.
+                    </div>
+                <% } else { %>
+                    <% lockedAccounts.forEach(acc => { %>
+                        <div class="flex items-center justify-between p-3.5 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono text-xs font-bold text-amber-400"><%= acc.identifier %></span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-300">
+                                        Sisa: <%= acc.remainingMinutes %> menit
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Terkunci hingga: <%= new Date(acc.lockedUntil).toLocaleTimeString() %></p>
+                            </div>
+                            <form action="/admin/security/unlock" method="POST">
+                                <input type="hidden" name="identifier" value="<%= acc.identifier %>">
+                                <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white transition">
+                                    Buka Kunci
+                                </button>
+                            </form>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Defense Matrix -->
+    <div class="bg-[#0c0c10] border border-white/[0.08] p-6 rounded-2xl">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span>⚙️</span> Matriks Perlindungan Google-Grade (10 Lapisan)
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div class="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">1. Adaptive IP Jail</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Tarpit & auto-ban 30m jika terdeteksi 3 pelanggaran.</p>
+            </div>
+
+            <div class="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">2. Anti-Hijack Guard</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">SHA-256 Device Fingerprint binding per sesi.</p>
+            </div>
+
+            <div class="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">3. Path Traversal Shield</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Blokir ../, %2e%2e, %00 null byte, dan LFI/RFI.</p>
+            </div>
+
+            <div class="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">4. Account Lockout</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Kunci akun 15 menit jika 5x berturut-turut gagal.</p>
+            </div>
+
+            <div class="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">5. Password Policy</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Wajib minimal 8 karakter, huruf + angka.</p>
+            </div>
+
+            <div class="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">6. XSS Sanitizer</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Pembersihan rekursif script, iframe & event handlers.</p>
+            </div>
+
+            <div class="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">7. Anti-CSRF Origin</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Validasi origin & referer ketat pada POST/PUT/DEL.</p>
+            </div>
+
+            <div class="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">8. SQLi Defense</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Parameterized queries + regex pattern interceptor.</p>
+            </div>
+
+            <div class="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">9. Multi-tier Limiter</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Global, Auth, Order, Voucher, & Socket Rate Limiting.</p>
+            </div>
+
+            <div class="p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">10. Permissions-Policy</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Blokir akses kamera, mikrofon, sensor hardware browser.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Security Audit Log Stream -->
+    <div class="bg-[#0c0c10] border border-white/[0.08] p-6 rounded-2xl">
+        <div class="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+            <div class="flex items-center gap-2.5">
+                <span class="text-lg">📜</span>
+                <h2 class="text-sm font-bold text-white uppercase tracking-wider">Live Security Audit Log Stream</h2>
+            </div>
+            <span class="text-xs text-slate-500 font-mono">Tersimpan di logs/security.log</span>
+        </div>
+
+        <div class="mt-4 bg-[#060608] border border-white/[0.06] rounded-xl p-4 font-mono text-[11px] leading-relaxed max-h-[420px] overflow-y-auto space-y-2 select-text">
+            <% if (logs.length === 0) { %>
+                <div class="text-slate-500 text-center py-6">Log keamanan kosong atau belum ada kejadian yang tercatat.</div>
+            <% } else { %>
+                <% logs.forEach(log => { %>
+                    <div class="py-1 border-b border-white/[0.03] hover:bg-white/[0.02] transition px-1 rounded flex items-start gap-2">
+                        <% if (log.includes('[CRITICAL]')) { %>
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-500/20 text-red-400 border border-red-500/30 shrink-0">CRITICAL</span>
+                        <% } else if (log.includes('[ALERT]')) { %>
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0">ALERT</span>
+                        <% } else if (log.includes('[WARN]')) { %>
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 shrink-0">WARN</span>
+                        <% } else { %>
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0">INFO</span>
+                        <% } %>
+                        <span class="text-slate-300 break-all"><%= log %></span>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+</div>

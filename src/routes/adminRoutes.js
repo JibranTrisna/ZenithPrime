@@ -44,4 +44,9 @@ router.post('/joki/services/create', jokiController.adminCreateService);
 router.post('/joki/services/update', jokiController.adminUpdateService);
 router.post('/joki/services/delete/:id', jokiController.adminDeleteService);
 
+// 🛡️ Google-Grade Security Command Center
+router.get('/security', adminController.securityCenter);
+router.post('/security/unjail', adminController.unjailIp);
+router.post('/security/unlock', adminController.unlockAccount);
+
 module.exports = router;

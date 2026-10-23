@@ -3,7 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const PromoModel = require('../models/promoModel');
 const TransactionModel = require('../models/transactionModel'); 
-const { isValidTransactionStatus } = require('../middlewares/securityMiddleware');
+const { isValidTransactionStatus, ipJailManager, accountLockoutManager } = require('../middlewares/securityMiddleware');
+const { logFilePath } = require('../utils/securityLogger');
 
 exports.dashboard = async (req, res) => {
     res.render('admin/dashboard', {
@@ -246,4 +247,52 @@ exports.updatePromoStatus = async (req, res) => {
         console.error(err);
         res.redirect('/admin/promos');
     }
+};
+
+
+// ==========================================
+// 🛡️ GOOGLE-GRADE SECURITY COMMAND CENTER
+// ==========================================
+exports.securityCenter = async (req, res) => {
+    try {
+        let logs = [];
+        if (fs.existsSync(logFilePath)) {
+            const raw = fs.readFileSync(logFilePath, 'utf8');
+            logs = raw.trim().split('\n').filter(Boolean).slice(-60).reverse();
+        }
+
+        const jailedIps = ipJailManager.getAllJailed();
+        const lockedAccounts = accountLockoutManager.getAllLocked();
+
+        res.render('admin/security', {
+            layout: 'layouts/admin_layout',
+            title: 'Google-Grade Security Center',
+            path: 'security',
+            user: req.session.user,
+            logs,
+            jailedIps,
+            lockedAccounts
+        });
+    } catch (err) {
+        console.error("Security Center Error:", err);
+        res.status(500).send("Security Center Error");
+    }
+};
+
+exports.unjailIp = (req, res) => {
+    const { ip } = req.body;
+    if (ip) {
+        ipJailManager.unjail(ip);
+        req.flash('success_msg', `IP ${ip} berhasil dibebaskan dari Karantina IP Jail.`);
+    }
+    res.redirect('/admin/security');
+};
+
+exports.unlockAccount = (req, res) => {
+    const { identifier } = req.body;
+    if (identifier) {
+        accountLockoutManager.unlock(identifier);
+        req.flash('success_msg', `Akun ${identifier} berhasil dibuka kuncinya.`);
+    }
+    res.redirect('/admin/security');
 };
